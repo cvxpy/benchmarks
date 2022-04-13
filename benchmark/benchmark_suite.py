@@ -136,12 +136,12 @@ class BenchmarkSuite(ABC):
         df_mean_formatted = self.format_result(df_mean, unit, normalize=self.normalize())
 
         output = f"Summary statistics of {len(dataframes)} runs:\n\n"
-        output += "Best:\n\n"
+        output += "Mean:\n\n"
+        output += df_mean_formatted.to_markdown(floatfmt=".2f")
+        output += "\n\nBest:\n\n"
         output += df_min_formatted.to_markdown(floatfmt=".2f")
         output += "\n\nWorst:\n\n"
-        output += df_max_formatted.to_markdown(floatfmt=".2f")
-        output += "\n\nMean:\n\n"
-        output += df_mean_formatted.to_markdown(floatfmt=".2f") + "\n\n"
+        output += df_max_formatted.to_markdown(floatfmt=".2f") + "\n\n"
 
         return output
 
@@ -190,19 +190,23 @@ class InteractiveComparisonBenchmarkSuite(BenchmarkSuite):
         self, repetitions: int
     ) -> Tuple[List[pd.DataFrame], pd.DataFrame]:
 
-        version_1 = input(
+        print('#' * 20)
+        print(
             "Install/checkout the first version of CVXPY you want to test "
             "and type a name in this console"
         )
+        version_1 = input("")
         assert len(version_1) > 0, "Please specify a version name through the input."
 
         repeated_version_1_timings, version_1_memory = \
             self.run_single_version_n_times(repetitions, version_1)
 
-        version_2 = input(
+        print('\n\n' + '#' * 20)
+        print(
             "Install/checkout the second version of CVXPY you want to test "
-            "and type a name in this console"
+            "and type a name in this console\n"
         )
+        version_2 = input("")
         assert len(version_2) > 0, "Please specify a version name through the input."
 
         repeated_version_2_timings, version_2_memory = \
