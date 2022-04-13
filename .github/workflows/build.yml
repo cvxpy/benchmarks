@@ -36,7 +36,8 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: 3.8
-      - run: |
+      - name: install and test
+        run: |
           pip install .
           pip install pytest
           pytest
