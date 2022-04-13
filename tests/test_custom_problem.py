@@ -2,7 +2,7 @@ import cvxpy as cp
 import numpy as np
 
 from benchmark.benchmark_base import Benchmark
-from benchmark.run_benchmarks import CurrentVersionBenchmarkSuite
+from benchmark.benchmark_suite import CurrentVersionBenchmarkSuite
 
 
 class CustomProblem(Benchmark):
@@ -27,10 +27,7 @@ class CustomProblem(Benchmark):
         return prob
 
 
-class CustomSuite(CurrentVersionBenchmarkSuite):
-    def get_registered_benchmarks(self):
-        return [CustomProblem()]
-
-
 def test_custom_problem():
-    CustomSuite(output_file="").run_benchmarks(repetitions=1)
+    benchmark_suite = CurrentVersionBenchmarkSuite(output_file="")
+    benchmark_suite.register_benchmark(CustomProblem())
+    benchmark_suite.run_benchmarks()

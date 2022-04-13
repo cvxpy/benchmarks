@@ -37,8 +37,20 @@ class BenchmarkSuite(ABC):
         self.start_time = None
         self.end_time = None
         self.output_file = output_file
+        self._benchmarks = []
+        self.cvxpy_version = cvxpy.__version__
 
-    def get_registered_benchmarks(self) -> List[Benchmark]:
+    @property
+    def benchmarks(self):
+        assert self._benchmarks, "No benchmark has been registered yet."
+        return self._benchmarks
+
+    def register_benchmark(self, benchmark):
+        assert isinstance(benchmark, Benchmark), \
+            "The benchmark to register must be an instance of the 'Benchmark' base class."
+        self._benchmarks.append(benchmark)
+
+    def register_default_benchmarks(self) -> None:
         benchmarks = [
             CVaRBenchmark(),
             QP1611Benchmark(),
@@ -47,9 +59,10 @@ class BenchmarkSuite(ABC):
             SimpleFullyParametrizedLPBenchmark(),
             SDPSegfault1132Benchmark(),
         ]
-        return benchmarks
+        for b in benchmarks:
+            self.register_benchmark(b)
 
-    def run_benchmarks(self, repetitions: int) -> Optional[str]:
+    def run_benchmarks(self, repetitions: int = 1) -> Optional[str]:
         assert repetitions > 0
 
         self.start_time = time.time()
@@ -111,31 +124,23 @@ class BenchmarkSuite(ABC):
         df_repeated_timings = pd.concat(dataframes)
         grouper = df_repeated_timings.groupby(df_repeated_timings.index)
 
-        df_min, df_max, df_mean, df_std = (
+        df_min, df_max, df_mean = (
             grouper.min(),
             grouper.max(),
-            grouper.mean(),
-            grouper.std(),
+            grouper.mean()
         )
 
         df_min_formatted = self.format_result(df_min, unit, normalize=self.normalize())
         df_max_formatted = self.format_result(df_max, unit, normalize=self.normalize())
         df_mean_formatted = self.format_result(df_mean, unit, normalize=self.normalize())
 
-        if self.normalize():
-            # normalize standard deviation w.r.t. to mean normalization factor
-            mean_min_values = df_mean.min(axis=1)
-            mean_normalized = df_mean.div(mean_min_values, axis=0)
-            df_std = df_std * (mean_normalized.div(df_mean))
-        std_formatted = self.format_result(df_std, "", normalize=False)
-
         output = f"Summary statistics of {len(dataframes)} runs:\n\n"
         output += "Best:\n\n"
         output += df_min_formatted.to_markdown(floatfmt=".2f")
         output += "\n\nWorst:\n\n"
         output += df_max_formatted.to_markdown(floatfmt=".2f")
-        output += "\n\nMean (SD):\n\n"
-        output += (df_mean_formatted + " (" + std_formatted + ")").to_markdown() + "\n\n"
+        output += "\n\nMean:\n\n"
+        output += df_mean_formatted.to_markdown(floatfmt=".2f") + "\n\n"
 
         return output
 
@@ -160,7 +165,7 @@ class BenchmarkSuite(ABC):
         template = template.replace("COMPILATION_PLACEHOLDER", timings)
         template = template.replace("MEMORY_PLACEHOLDER", memory)
 
-        template = template.replace("CVXPY_VERSION", cvxpy.__version__)
+        template = template.replace("CVXPY_VERSION", self.cvxpy_version)
         template = template.replace("DATE", datetime.now().isoformat())
         template = template.replace("TOTAL_TIME", f"{self.end_time - self.start_time:.2f}s")
         template = template.replace("MAX_MEMORY", f"{max_memory:.2f}GiB")
@@ -184,49 +189,50 @@ class InteractiveComparisonBenchmarkSuite(BenchmarkSuite):
         self, repetitions: int
     ) -> Tuple[List[pd.DataFrame], pd.DataFrame]:
 
-        input(
-            "Checkout the feature branch in a different terminal window. "
-            "Press any key to continue."
+        version_1 = input(
+            "Install/checkout the first version of CVXPY you want to test "
+            "and type a name in this console"
         )
+        assert len(version_1) > 0, "Please specify a version name through the input."
 
-        repeated_feature_timings = []
-        feature_memory_traces = None
-        for repetition in range(1, repetitions + 1):
-            print(f"\n\nRunning feature {repetition=}/{repetitions} in subprocess...")
-            feature_timings, feature_memory_traces = self.single_branch_run()
-            feature_timings.name = "FEATURE"
-            repeated_feature_timings.append(feature_timings)
-            feature_memory_traces.name = "FEATURE"
-        assert feature_memory_traces is not None
+        repeated_version_1_timings, version_1_memory = \
+            self.run_single_version_n_times(repetitions, version_1)
 
-        input(
-            "Checkout the reference branch in a different terminal window. "
-            "Press any key to continue."
+        version_2 = input(
+            "Install/checkout the second version of CVXPY you want to test "
+            "and type a name in this console"
         )
+        assert len(version_2) > 0, "Please specify a version name through the input."
 
-        repeated_reference_timings = []
-        reference_memory_traces = None
-        for repetition in range(1, repetitions + 1):
-            print(f"\n\nRunning reference {repetition=}/{repetitions} in subprocess...")
-            reference_timings, reference_memory_traces = self.single_branch_run()
-            reference_timings.name = "REFERENCE"
-            repeated_reference_timings.append(reference_timings)
-            reference_memory_traces.name = "REFERENCE"
-        assert reference_memory_traces is not None
+        repeated_version_2_timings, version_2_memory = \
+            self.run_single_version_n_times(repetitions, version_2)
 
         repeated_timings = [
             pd.concat([feat, ref], axis=1)
-            for feat, ref in zip(repeated_feature_timings, repeated_reference_timings)
+            for feat, ref in zip(repeated_version_1_timings, repeated_version_2_timings)
         ]
 
-        return repeated_timings, pd.concat([feature_memory_traces, reference_memory_traces], axis=1)
+        self.cvxpy_version = f"{version_1} / {version_2}"
 
-    def single_branch_run(self):
-        benchs = self.get_registered_benchmarks()
+        return repeated_timings, pd.concat([version_1_memory, version_2_memory], axis=1)
+
+    def run_single_version_n_times(self, repetitions: int, version_name: str):
+        repeated_timings = []
+        memory_traces = None
+        for repetition in range(1, repetitions + 1):
+            print(f"\n\nRunning {version_name} {repetition=}/{repetitions} in subprocess...")
+            timings, memory_traces = self.run_single_version()
+            timings.name = version_name
+            repeated_timings.append(timings)
+            memory_traces.name = version_name
+        assert memory_traces is not None
+        return repeated_timings, memory_traces
+
+    def run_single_version(self):
 
         timings = []
         memory_traces = []
-        for bench in benchs:
+        for bench in self.benchmarks:
             # Switching branches requires a dynamic reload of modules,
             # which is achieved by running the benchmark in
             # a subprocess, creating a suboptimal interface here.
@@ -244,8 +250,8 @@ class InteractiveComparisonBenchmarkSuite(BenchmarkSuite):
                 float(next(iter([x.split(" ")[-1] for x in output if "MEMORY" in x])))
             )
 
-        bench_names = [b.name() for b in benchs]
-        return pd.Series(timings, bench_names), pd.Series(memory_traces, bench_names)
+        bench_names = [b.name() for b in self.benchmarks]
+        return pd.Series(timings, bench_names), pd.Series(memory_traces, bench_names),
 
     @staticmethod
     def normalize():
@@ -267,11 +273,10 @@ class CurrentVersionBenchmarkSuite(BenchmarkSuite):
         return repeated_timings, memory_traces
 
     def single_run(self):
-        benchs = self.get_registered_benchmarks()
 
         timings = []
         memory_traces = []
-        for bench in benchs:
+        for bench in self.benchmarks:
 
             bench_timings = {}
             bench_memory = {}
