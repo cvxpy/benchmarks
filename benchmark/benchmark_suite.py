@@ -12,6 +12,7 @@ limitations under the License.
 """
 import os
 import pathlib
+import re
 import subprocess
 import time
 from abc import ABC, abstractmethod
@@ -245,10 +246,14 @@ class InteractiveComparisonBenchmarkSuite(BenchmarkSuite):
                 f'print("MEMORY", bench.memory_peak)\''
             )
             output = subprocess.check_output(command, shell=True).decode("utf-8").split("\n")
-            timings.append(float(next(iter([x.split(" ")[-1] for x in output if "TIMING" in x]))))
-            memory_traces.append(
-                float(next(iter([x.split(" ")[-1] for x in output if "MEMORY" in x])))
-            )
+
+            timing_regex = re.compile(r"(?<=^TIMING )\d+\.\d+")
+            timing = float(timing_regex.findall(output[-3])[0])
+            timings.append(timing)
+
+            memory_regex = re.compile(r"(?<=^MEMORY )\d+\.\d+")
+            memory_usage = float(memory_regex.findall(output[-2])[0])
+            memory_traces.append(memory_usage)
 
         bench_names = [b.name() for b in self.benchmarks]
         return pd.Series(timings, bench_names), pd.Series(memory_traces, bench_names),
