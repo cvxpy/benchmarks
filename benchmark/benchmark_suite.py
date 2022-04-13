@@ -153,7 +153,7 @@ class BenchmarkSuite(ABC):
 
         if self.normalize():
             time_normalization_message = (
-                "Timings are normalized with respect to the" " fastest implementation.\n\n"
+                "Timings are normalized with respect to the fastest implementation.\n\n"
             )
             memory_normalization_message = (
                 "Memory consumptions is normalized with respect"
