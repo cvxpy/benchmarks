@@ -14,16 +14,8 @@ limitations under the License.
 import cvxpy as cp
 import numpy as np
 
-from benchmark.benchmark_base import Benchmark
-
-
-class SDPSegfault1132Benchmark(Benchmark):
-    @staticmethod
-    def name() -> str:
-        return "SDP Segfault issue 1132"
-
-    @staticmethod
-    def get_problem_instance() -> cp.Problem:
+class SDPSegfault1132Benchmark():
+    def setup(self):
         n = 100
         alpha = 1
         np.random.seed(0)
@@ -52,10 +44,7 @@ class SDPSegfault1132Benchmark(Benchmark):
         C = alpha * cp.norm(cp.multiply(W, A + B - 2 * V @ G @ V.T - D), p="fro")
         objective = cp.Maximize(cp.trace(G) - C)
         problem = cp.Problem(objective, [])
-        return problem
+        self.problem = problem
 
-
-if __name__ == "__main__":
-    bench = SDPSegfault1132Benchmark()
-    bench.run_benchmark()
-    bench.print_benchmark_results()
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)

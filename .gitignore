@@ -130,4 +130,8 @@ dmypy.json
 
 .idea
 
+#results
 benchmark_report.md
+results/
+
+cvxpy/

@@ -21,5 +21,6 @@ setuptools.setup(
         "cvxpy",
         "pandas",
         "tabulate",
+        "asv",
     ],
 )

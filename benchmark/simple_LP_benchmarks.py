@@ -14,48 +14,36 @@ limitations under the License.
 import cvxpy as cp
 import numpy as np
 
-from benchmark.benchmark_base import Benchmark
-
-
-class SimpleLPBenchmark(Benchmark):
-    @staticmethod
-    def name() -> str:
-        return "Simple LP"
-
-    @staticmethod
-    def get_problem_instance() -> cp.Problem:
+class SimpleLPBenchmark():
+    def setup(self):
         n = int(1e7)
         c = np.arange(n)
         x = cp.Variable(n)
         objective = cp.Minimize(c @ x)
         constraints = [0 <= x, x <= 1]
         problem = cp.Problem(objective, constraints)
-        return problem
+        self.problem = problem
+    
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)
 
 
-class SimpleFullyParametrizedLPBenchmark(Benchmark):
-    @staticmethod
-    def name() -> str:
-        return "Simple fully parametrized LP"
-
-    @staticmethod
-    def get_problem_instance() -> cp.Problem:
+class SimpleFullyParametrizedLPBenchmark():
+    def setup(self):
         n = int(1e4)
         p = cp.Parameter(n)
         x = cp.Variable(n)
         objective = cp.Minimize(p @ x)
         constraints = [0 <= x, x <= 1]
         problem = cp.Problem(objective, constraints)
-        return problem
+        self.problem = problem
+    
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)
 
 
-class SimpleScalarParametrizedLPBenchmark(Benchmark):
-    @staticmethod
-    def name() -> str:
-        return "Simple scalar parametrized LP"
-
-    @staticmethod
-    def get_problem_instance() -> cp.Problem:
+class SimpleScalarParametrizedLPBenchmark():
+    def setup(self):
         n = int(1e6)
         p = cp.Parameter()
         c = np.arange(n)
@@ -63,18 +51,7 @@ class SimpleScalarParametrizedLPBenchmark(Benchmark):
         objective = cp.Minimize((p * c) @ x)
         constraints = [0 <= x, x <= 1]
         problem = cp.Problem(objective, constraints)
-        return problem
-
-
-if __name__ == "__main__":
-    bench = SimpleLPBenchmark()
-    bench.run_benchmark()
-    bench.print_benchmark_results()
-
-    bench = SimpleFullyParametrizedLPBenchmark()
-    bench.run_benchmark()
-    bench.print_benchmark_results()
-
-    bench = SimpleFullyParametrizedLPBenchmark()
-    bench.run_benchmark()
-    bench.print_benchmark_results()
+        self.problem = problem
+    
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)
