@@ -20,5 +20,6 @@ setuptools.setup(
     install_requires=[
         "cvxpy",
         "asv",
+        "virtualenv",
     ],
 )
