@@ -15,16 +15,11 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
-from benchmark.benchmark_base import Benchmark
 
+class CVaRBenchmark():
+    timeout = 999
 
-class CVaRBenchmark(Benchmark):
-    @staticmethod
-    def name() -> str:
-        return "CVaR"
-
-    @staticmethod
-    def get_problem_instance() -> cp.Problem:
+    def setup(self):
         # Replaced real data with random values
         np.random.seed(0)
         price_scenarios = np.random.randn(131072, 192)
@@ -81,4 +76,13 @@ class CVaRBenchmark(Benchmark):
             ],
         )
 
-        return problem
+        self.problem = problem
+
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)
+
+
+if __name__ == '__main__':
+    cvar = CVaRBenchmark()
+    cvar.setup()
+    cvar.time_compile_problem()
