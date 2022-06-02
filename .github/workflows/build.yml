@@ -39,5 +39,4 @@ jobs:
       - name: install and test
         run: |
           pip install .
-          pip install pytest
-          pytest
+]         asv check
