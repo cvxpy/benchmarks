@@ -39,4 +39,4 @@ jobs:
       - name: install and test
         run: |
           pip install .
-]         asv check
+          asv check
