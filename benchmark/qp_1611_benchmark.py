@@ -17,8 +17,12 @@ import pickle
 
 import cvxpy as cp
 
+
 class QP1611Benchmark():
-    filename = os.path.join(os.path.join(pathlib.Path(__file__).parent.resolve(), "benchmark_data"), "QP1611.pickle")
+    timeout = 999
+    filename = os.path.join(
+        os.path.join(pathlib.Path(__file__).parent.resolve(), "benchmark_data"), "QP1611.pickle"
+    )
 
     def setup(self):
         with open(QP1611Benchmark.filename, "rb") as f:
@@ -27,3 +31,9 @@ class QP1611Benchmark():
 
     def time_compile_problem(self):
         self.problem.get_problem_data(solver=cp.ECOS_BB)
+
+
+if __name__ == '__main__':
+    qp_1611 = QP1611Benchmark()
+    qp_1611.setup()
+    qp_1611.time_compile_problem()

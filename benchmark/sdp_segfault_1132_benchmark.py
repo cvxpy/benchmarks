@@ -14,7 +14,10 @@ limitations under the License.
 import cvxpy as cp
 import numpy as np
 
+
 class SDPSegfault1132Benchmark():
+    timeout = 999
+
     def setup(self):
         n = 100
         alpha = 1
@@ -48,3 +51,9 @@ class SDPSegfault1132Benchmark():
 
     def time_compile_problem(self):
         self.problem.get_problem_data(solver=cp.SCS)
+
+
+if __name__ == '__main__':
+    sdp_1132 = SDPSegfault1132Benchmark()
+    sdp_1132.setup()
+    sdp_1132.time_compile_problem()

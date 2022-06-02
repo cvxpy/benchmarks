@@ -15,7 +15,10 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
+
 class CVaRBenchmark():
+    timeout = 999
+
     def setup(self):
         # Replaced real data with random values
         np.random.seed(0)
@@ -77,3 +80,9 @@ class CVaRBenchmark():
 
     def time_compile_problem(self):
         self.problem.get_problem_data(solver=cp.SCS)
+
+
+if __name__ == '__main__':
+    cvar = CVaRBenchmark()
+    cvar.setup()
+    cvar.time_compile_problem()

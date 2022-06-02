@@ -14,6 +14,7 @@ limitations under the License.
 import cvxpy as cp
 import numpy as np
 
+
 class SimpleLPBenchmark():
     def setup(self):
         n = int(1e7)
@@ -23,7 +24,7 @@ class SimpleLPBenchmark():
         constraints = [0 <= x, x <= 1]
         problem = cp.Problem(objective, constraints)
         self.problem = problem
-    
+
     def time_compile_problem(self):
         self.problem.get_problem_data(solver=cp.SCS)
 
@@ -37,7 +38,7 @@ class SimpleFullyParametrizedLPBenchmark():
         constraints = [0 <= x, x <= 1]
         problem = cp.Problem(objective, constraints)
         self.problem = problem
-    
+
     def time_compile_problem(self):
         self.problem.get_problem_data(solver=cp.SCS)
 
@@ -52,6 +53,20 @@ class SimpleScalarParametrizedLPBenchmark():
         constraints = [0 <= x, x <= 1]
         problem = cp.Problem(objective, constraints)
         self.problem = problem
-    
+
     def time_compile_problem(self):
         self.problem.get_problem_data(solver=cp.SCS)
+
+
+if __name__ == '__main__':
+    simple_lp = SimpleLPBenchmark()
+    simple_lp.setup()
+    simple_lp.time_compile_problem()
+
+    simple_fully_lp = SimpleFullyParametrizedLPBenchmark()
+    simple_fully_lp.setup()
+    simple_fully_lp.time_compile_problem()
+
+    simple_scalar_lp = SimpleScalarParametrizedLPBenchmark()
+    simple_scalar_lp.setup()
+    simple_scalar_lp.time_compile_problem()
