@@ -39,9 +39,7 @@
         "ecos": [],
         "scs": [],
         "numpy": [],
-        "scipy": [],
-        "pandas": [],
-        "tabulate": []
+        "scipy": []
     },
 
     // The directory (relative to the current directory) that benchmarks are

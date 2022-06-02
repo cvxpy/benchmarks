@@ -19,8 +19,6 @@ setuptools.setup(
     license='Apache License, Version 2.0',
     install_requires=[
         "cvxpy",
-        "pandas",
-        "tabulate",
         "asv",
     ],
 )
