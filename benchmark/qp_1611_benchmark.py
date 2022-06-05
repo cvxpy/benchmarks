@@ -12,32 +12,28 @@ limitations under the License.
 """
 
 import os
+import pathlib
 import pickle
 
 import cvxpy as cp
 
-from benchmark.benchmark_base import Benchmark
 
+class QP1611Benchmark():
+    timeout = 999
+    filename = os.path.join(
+        os.path.join(pathlib.Path(__file__).parent.resolve(), "benchmark_data"), "QP1611.pickle"
+    )
 
-class QP1611Benchmark(Benchmark):
-    filename = os.path.join(Benchmark.data_folder, "QP1611.pickle")
-
-    @staticmethod
-    def name() -> str:
-        return "QP issue 1611"
-
-    @staticmethod
-    def get_problem_instance() -> cp.Problem:
+    def setup(self):
         with open(QP1611Benchmark.filename, "rb") as f:
             problem = pickle.load(f)
-        return problem
+        self.problem = problem
 
-    @staticmethod
-    def get_solver():
-        return cp.ECOS_BB
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.ECOS_BB)
 
 
-if __name__ == "__main__":
-    bench = QP1611Benchmark()
-    bench.run_benchmark()
-    bench.print_benchmark_results()
+if __name__ == '__main__':
+    qp_1611 = QP1611Benchmark()
+    qp_1611.setup()
+    qp_1611.time_compile_problem()

@@ -1,3 +1,8 @@
+[tool.isort]
+include_trailing_comma = true
+use_parentheses = true
+
+
 [build-system]
 requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
