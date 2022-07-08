@@ -1,7 +1,7 @@
 {
     "arch": "x86_64",
-    "cpu": "Intel(R) Xeon(R) Platinum 8370C CPU @ 2.80GHz",
-    "machine": "fv-az196-525",
+    "cpu": "Intel(R) Xeon(R) CPU E5-2673 v3 @ 2.40GHz",
+    "machine": "fv-az502-359",
     "num_cpu": "2",
     "os": "Linux 5.13.0-1031-azure",
     "ram": "7113128",

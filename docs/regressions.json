@@ -1,1 +1,1 @@
-{"regressions": []}
+{"regressions": [["simple_LP_benchmarks.SimpleFullyParametrizedLPBenchmark.time_compile_problem", "graphs/arch-x86_64/branch-HEAD/cpu-Intel(R) Xeon(R) CPU E5-2673 v3 @ 2.40GHz/ecos/machine-fv-az502-359/num_cpu-2/numpy/os-Linux 5.13.0-1031-azure/osqp/python-3.8/ram-7113128/scipy/scs/simple_LP_benchmarks.SimpleFullyParametrizedLPBenchmark.time_compile_problem.json", {}, null, 4.068169191000038, 3.7304004105000104, [[null, 5764, 3.7304004105000104, 4.068169191000038]]]]}
