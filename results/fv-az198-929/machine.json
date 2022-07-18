@@ -1,0 +1,9 @@
+{
+    "arch": "x86_64",
+    "cpu": "Intel(R) Xeon(R) Platinum 8171M CPU @ 2.60GHz",
+    "machine": "fv-az198-929",
+    "num_cpu": "2",
+    "os": "Linux 5.13.0-1031-azure",
+    "ram": "7113128",
+    "version": 1
+}
