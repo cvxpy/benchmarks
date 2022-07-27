@@ -15,6 +15,22 @@
         "version": "2a130e57c07794b9a40b3e5a9a60e571c4fd23d7bc4db3d214200c409f06decc",
         "warmup_time": -1
     },
+    "optimal_advertising.OptimalAdvertising.time_compile_problem": {
+        "code": "class OptimalAdvertising:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        np.random.seed(1)\n        m = 250\n        n = 1000\n        SCALE = 10000\n        B = np.random.lognormal(mean=8, size=(m, 1)) + 10000\n        B = 1000 * np.round(B / 1000)\n    \n        P_ad = np.random.uniform(size=(m, 1))\n        P_time = np.random.uniform(size=(1, n))\n        P = P_ad.dot(P_time)\n    \n        T = np.sin(np.linspace(-2 * np.pi / 2, 2 * np.pi - 2 * np.pi / 2, n)) * SCALE\n        T += -np.min(T) + SCALE\n        c = np.random.uniform(size=(m,))\n        c *= 0.6 * T.sum() / c.sum()\n        c = 1000 * np.round(c / 1000)\n        R = np.array([np.random.lognormal(c.min() / c[i]) for i in range(m)])\n    \n        # Solve optimization problem\n        D = cp.Variable((m, n))\n        Si = [cp.minimum(R[i] * P[i, :] @ D[i, :].T, B[i]) for i in range(m)]\n        objective = cp.Maximize(cp.sum(Si))\n        constraints = [D >= 0, D.T @ np.ones(m) <= T, D @ np.ones(n) >= c]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "min_run_count": 2,
+        "name": "optimal_advertising.OptimalAdvertising.time_compile_problem",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "c1a33d0f2763ff52fb848b520767be561f657e1ed9704dd7f263d252b8391fd5",
+        "warmup_time": -1
+    },
     "qp_1611_benchmark.QP1611Benchmark.time_compile_problem": {
         "code": "class QP1611Benchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.ECOS_BB)\n\n    def setup(self):\n        with open(QP1611Benchmark.filename, \"rb\") as f:\n            problem = pickle.load(f)\n        self.problem = problem",
         "min_run_count": 2,
