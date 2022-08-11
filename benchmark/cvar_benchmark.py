@@ -11,9 +11,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
+
+import cvxpy as cp
 
 
 class CVaRBenchmark():
