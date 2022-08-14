@@ -15,7 +15,7 @@ import cvxpy as cp
 import numpy as np
 
 
-class SVMWithL1Regularization():
+class SVMWithL1Regularization:
     """
     Taken from https://stanford.edu/~boyd/papers/cvx_short_course.html
     """
