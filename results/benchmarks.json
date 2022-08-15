@@ -111,5 +111,21 @@
         "version": "643deb6bc63211d7d322ac7ec9fe22c254ac6122afa51d53009157dbec777013",
         "warmup_time": -1
     },
+    "svm_l1_regularization.SVMWithL1Regularization.time_compile_problem": {
+        "code": "class SVMWithL1Regularization:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        np.random.seed(1)\n        n = 500\n        m = 25000\n        DENSITY = 0.2\n        beta_true = np.random.randn(n, 1)\n        idxs = np.random.choice(range(n), int((1 - DENSITY) * n), replace=False)\n        for idx in idxs:\n            beta_true[idx] = 0\n    \n        offset = 0\n        sigma = 45\n        X = np.random.normal(0, 5, size=(m, n))\n        Y = np.sign(X.dot(beta_true) + offset + np.random.normal(0, sigma, size=(m, 1)))\n    \n        # Solve optimization problem\n        beta = cp.Variable((n, 1))\n        v = cp.Variable()\n        loss = cp.sum(cp.pos(1 - cp.multiply(Y, X @ beta - v)))\n        reg = cp.norm(beta, 1)\n        lambd = cp.Parameter(nonneg=True)\n        objective = cp.Minimize(loss / m + lambd * reg)\n        problem = cp.Problem(objective)\n        self.problem = problem",
+        "min_run_count": 2,
+        "name": "svm_l1_regularization.SVMWithL1Regularization.time_compile_problem",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "03d77ce97e937084e6f88faf3ac4cad3d9e26690ed9d022ea9190f1e15001ea5",
+        "warmup_time": -1
+    },
     "version": 2
 }
