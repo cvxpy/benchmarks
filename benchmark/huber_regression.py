@@ -16,6 +16,10 @@ import numpy as np
 
 
 class HuberRegression():
+    """
+    Taken from https://stanford.edu/~boyd/papers/cvx_short_course.html
+    """
+
     def setup(self):
         np.random.seed(1)
         n = 3000
