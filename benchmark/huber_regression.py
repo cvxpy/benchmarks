@@ -18,8 +18,8 @@ import numpy as np
 class HuberRegression():
     def setup(self):
         np.random.seed(1)
-        n = 300
-        p = 0.1
+        n = 3000
+        p = 0.12
         SAMPLES = int(1.5 * n)
         beta_true = 5 * np.random.normal(size=(n, 1))
         X = np.random.randn(n, SAMPLES)
