@@ -15,7 +15,7 @@ import cvxpy as cp
 import numpy as np
 
 
-class SemidefiniteProgramming():
+class SemidefiniteProgramming:
     """
     Taken from https://github.com/cvxpy/cvxpy/blob/master/examples/notebooks/WWW/sdp.ipynb
     """
