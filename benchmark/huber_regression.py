@@ -15,7 +15,7 @@ import cvxpy as cp
 import numpy as np
 
 
-class HuberRegression():
+class HuberRegression:
     """
     Taken from https://stanford.edu/~boyd/papers/cvx_short_course.html
     """
@@ -27,7 +27,6 @@ class HuberRegression():
         SAMPLES = int(1.5 * n)
         beta_true = 5 * np.random.normal(size=(n, 1))
         X = np.random.randn(n, SAMPLES)
-        Y = np.zeros((SAMPLES, 1))
         v = np.random.normal(size=(SAMPLES, 1))
 
         # Generate the sign changes.
