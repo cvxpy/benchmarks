@@ -15,6 +15,22 @@
         "version": "2a130e57c07794b9a40b3e5a9a60e571c4fd23d7bc4db3d214200c409f06decc",
         "warmup_time": -1
     },
+    "huber_regression.HuberRegression.time_compile_problem": {
+        "code": "class HuberRegression:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        np.random.seed(1)\n        n = 3000\n        p = 0.12\n        SAMPLES = int(1.5 * n)\n        beta_true = 5 * np.random.normal(size=(n, 1))\n        X = np.random.randn(n, SAMPLES)\n        v = np.random.normal(size=(SAMPLES, 1))\n    \n        # Generate the sign changes.\n        factor = 2 * np.random.binomial(1, 1 - p, size=(SAMPLES, 1)) - 1\n        Y = factor * X.T.dot(beta_true) + v\n        beta = cp.Variable((n, 1))\n        # Solve a huber regression problem\n        cost = cp.sum(cp.huber(X.T @ beta - Y, 1))\n        objective = cp.Minimize(cost)\n        problem = cp.Problem(objective)\n        self.problem = problem",
+        "min_run_count": 2,
+        "name": "huber_regression.HuberRegression.time_compile_problem",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "370ff6507bcc626b80bd3ca3731e4b1df2171a5b7510fb7e43a09572a8b2c71e",
+        "warmup_time": -1
+    },
     "optimal_advertising.OptimalAdvertising.time_compile_problem": {
         "code": "class OptimalAdvertising:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        np.random.seed(1)\n        m = 250\n        n = 1000\n        SCALE = 10000\n        B = np.random.lognormal(mean=8, size=(m, 1)) + 10000\n        B = 1000 * np.round(B / 1000)\n    \n        P_ad = np.random.uniform(size=(m, 1))\n        P_time = np.random.uniform(size=(1, n))\n        P = P_ad.dot(P_time)\n    \n        T = np.sin(np.linspace(-2 * np.pi / 2, 2 * np.pi - 2 * np.pi / 2, n)) * SCALE\n        T += -np.min(T) + SCALE\n        c = np.random.uniform(size=(m,))\n        c *= 0.6 * T.sum() / c.sum()\n        c = 1000 * np.round(c / 1000)\n        R = np.array([np.random.lognormal(c.min() / c[i]) for i in range(m)])\n    \n        # Solve optimization problem\n        D = cp.Variable((m, n))\n        Si = [cp.minimum(R[i] * P[i, :] @ D[i, :].T, B[i]) for i in range(m)]\n        objective = cp.Maximize(cp.sum(Si))\n        constraints = [D >= 0, D.T @ np.ones(m) <= T, D @ np.ones(n) >= c]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
@@ -61,6 +77,22 @@
         "type": "time",
         "unit": "seconds",
         "version": "ed808360d3230f364014822f855b979ad49e444e8bdeb093f06f2452c0c8deb5",
+        "warmup_time": -1
+    },
+    "semidefinite_programming.SemidefiniteProgramming.time_compile_problem": {
+        "code": "class SemidefiniteProgramming:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        # Generate a random SDP.\n        n = 125\n        p = 75\n        np.random.seed(1)\n        C = np.random.randn(n, n)\n        A = []\n        b = []\n        for i in range(p):\n            A.append(np.random.randn(n, n))\n            b.append(np.random.randn())\n    \n        # Define and solve the CVXPY problem.\n        # Create a symmetric matrix variable.\n        X = cp.Variable((n, n), symmetric=True)\n        constraints = [X >> 0]\n        constraints += [cp.trace(A[i]@X) == b[i] for i in range(p)]\n        objective = cp.Minimize(cp.trace(C@X))\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "min_run_count": 2,
+        "name": "semidefinite_programming.SemidefiniteProgramming.time_compile_problem",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "7708d520cbcb2203c40cbc6c50278b5bbdd238f3ef571a4f70bbb2f1ead3abe7",
         "warmup_time": -1
     },
     "simple_LP_benchmarks.SimpleFullyParametrizedLPBenchmark.time_compile_problem": {
