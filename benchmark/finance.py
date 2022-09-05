@@ -104,7 +104,7 @@ class FactorCovarianceModel:
         constraints = [cp.sum(w) == 1, f == F.T @ w, cp.norm(w, 1) <= self.Lmax]
         problem = cp.Problem(objective, constraints)
         self.problem = problem
-    
+
     def time_compile_problem(self):
         self.Lmax.value = 2
         self.gamma.value = 0.1

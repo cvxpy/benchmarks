@@ -21,27 +21,26 @@ class Yitzhaki():
     def setup(self):
         rs = np.random.RandomState(123)
         n = 100
-        cov = rs.rand(n,n) * 1.5 - 0.5
+        cov = rs.rand(n, n) * 1.5 - 0.5
         cov = cov @ cov.T/1000 + np.diag(rs.rand(n) * 0.7 + 0.3)/1000
         mean = np.zeros(n) + 1/1000
         Y = st.multivariate_normal.rvs(mean=mean, cov=cov, size=280, random_state=rs)
         Y = pd.DataFrame(Y)
         returns = Y.to_numpy()
-        assets = ['Asset '+ str(i) for i in range(1,n+1)]
-        D = np.array([]).reshape(0,len(assets))
+        assets = ['Asset ' + str(i) for i in range(1, n + 1)]
+        D = np.array([]).reshape(0, len(assets))
         for j in range(0, returns.shape[0]-1):
-            D = np.concatenate((D, returns[j+1:] - returns[j,:]), axis=0)
+            D = np.concatenate((D, returns[j+1:] - returns[j, :]), axis=0)
 
         (T, N) = returns.shape
-        d = cp.Variable((int(T * (T - 1) / 2),1))
-        w = cp.Variable((N,1))
+        d = cp.Variable((int(T * (T - 1) / 2), 1))
+        w = cp.Variable((N, 1))
         constraints = []
         all_pairs_ret_diff = D @ w
         constraints += [d >= all_pairs_ret_diff,
                         d >= -all_pairs_ret_diff,
                         w >= 0,
-                        cp.sum(w) == 1,
-                       ]
+                        cp.sum(w) == 1]
         risk = cp.sum(d) / ((T - 1) * T)
         objective = cp.Minimize(risk * 1000)
         problem = cp.Problem(objective, constraints)
@@ -55,7 +54,7 @@ class Murray():
     def setup(self):
         rs = np.random.RandomState(123)
         n = 100
-        cov = rs.rand(n,n) * 1.5 - 0.5
+        cov = rs.rand(n, n) * 1.5 - 0.5
         cov = cov @ cov.T/1000 + np.diag(rs.rand(n) * 0.7 + 0.3)/1000
         mean = np.zeros(n) + 1/1000
         Y = st.multivariate_normal.rvs(mean=mean, cov=cov, size=750, random_state=rs)
@@ -63,13 +62,13 @@ class Murray():
         returns = Y.to_numpy()
 
         (T, N) = returns.shape
-        d = cp.Variable((int(T * (T - 1) / 2),1))
-        w = cp.Variable((N,1))
+        d = cp.Variable((int(T * (T - 1) / 2), 1))
+        w = cp.Variable((N, 1))
         constraints = []
-        ret_w = cp.Variable((T,1))
+        ret_w = cp.Variable((T, 1))
         constraints.append(ret_w == returns @ w)
         mat = np.zeros((d.shape[0], T))
-        """ 
+        """
         We need to create a vector that has the following entries:
             ret_w[i] - ret_w[j]
         for j in range(T), for i in range(j+1, T).
@@ -78,7 +77,7 @@ class Murray():
         """
         ell = 0
         for j in range(T):
-            for i in range(j+1, T):
+            for i in range(j + 1, T):
                 # write to mat so that (mat @ ret_w)[ell] == var_i - var_j
                 mat[ell, i] = 1
                 mat[ell, j] = -1
@@ -87,8 +86,7 @@ class Murray():
         constraints += [d >= all_pairs_ret_diff,
                         d >= -all_pairs_ret_diff,
                         w >= 0,
-                        cp.sum(w) == 1,
-                       ]
+                        cp.sum(w) == 1]
         risk = cp.sum(d) / ((T - 1) * T)
         objective = cp.Minimize(risk * 1000)
         problem = cp.Problem(objective, constraints)
