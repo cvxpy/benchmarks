@@ -47,22 +47,6 @@
         "version": "c1a33d0f2763ff52fb848b520767be561f657e1ed9704dd7f263d252b8391fd5",
         "warmup_time": -1
     },
-    "qp_1611_benchmark.QP1611Benchmark.time_compile_problem": {
-        "code": "class QP1611Benchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.ECOS_BB)\n\n    def setup(self):\n        with open(QP1611Benchmark.filename, \"rb\") as f:\n            problem = pickle.load(f)\n        self.problem = problem",
-        "min_run_count": 2,
-        "name": "qp_1611_benchmark.QP1611Benchmark.time_compile_problem",
-        "number": 0,
-        "param_names": [],
-        "params": [],
-        "repeat": 0,
-        "rounds": 2,
-        "sample_time": 0.01,
-        "timeout": 999,
-        "type": "time",
-        "unit": "seconds",
-        "version": "4f1e2751391e8545c90058b89a009be9a8748d009ad99b6f8a11222d314838cd",
-        "warmup_time": -1
-    },
     "sdp_segfault_1132_benchmark.SDPSegfault1132Benchmark.time_compile_problem": {
         "code": "class SDPSegfault1132Benchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        n = 100\n        alpha = 1\n        np.random.seed(0)\n        points = np.random.rand(5, n)\n        xtx = points.T @ points\n        xtxd = np.diag(xtx)\n        e = np.ones((n,))\n        D = np.outer(e, xtxd) - 2 * xtx + np.outer(xtxd, e)\n        # Construct W\n        W = np.ones((n, n))\n    \n        # Define V and e\n        n = D.shape[0]\n        x = -1 / (n + np.sqrt(n))\n        y = -1 / np.sqrt(n)\n        V = np.ones((n, n - 1))\n        V[0, :] *= y\n        V[1:, :] *= x\n        V[1:, :] += np.eye(n - 1)\n        e = np.ones((n, 1))\n    \n        # Solve optimization problem\n        G = cp.Variable((n - 1, n - 1), PSD=True)\n        A = cp.kron(e, cp.reshape(cp.diag(V @ G @ V.T), (1, n)))\n        B = cp.kron(e.T, cp.reshape(cp.diag(V @ G @ V.T), (n, 1)))\n        C = alpha * cp.norm(cp.multiply(W, A + B - 2 * V @ G @ V.T - D), p=\"fro\")\n        objective = cp.Maximize(cp.trace(G) - C)\n        problem = cp.Problem(objective, [])\n        self.problem = problem",
         "min_run_count": 2,
