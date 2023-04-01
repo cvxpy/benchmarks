@@ -1,0 +1,9 @@
+{
+    "arch": "x86_64",
+    "cpu": "Intel(R) Xeon(R) CPU E5-2673 v4 @ 2.30GHz",
+    "machine": "fv-az298-209",
+    "num_cpu": "2",
+    "os": "Linux 5.15.0-1034-azure",
+    "ram": "7110624",
+    "version": 1
+}
