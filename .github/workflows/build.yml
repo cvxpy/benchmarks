@@ -38,5 +38,6 @@ jobs:
           python-version: 3.8
       - name: install and test
         run: |
+          pip install pybind11
           pip install .
           asv check
