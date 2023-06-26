@@ -39,7 +39,8 @@
         "ecos": [],
         "scs": [],
         "numpy": [],
-        "scipy": []
+        "scipy": [],
+        "pybind11": []
     },
 
     // The directory (relative to the current directory) that benchmarks are
@@ -64,7 +65,7 @@
     // `asv` will cache results of the recent builds in each
     // environment, making them faster to install next time.  This is
     // the number of builds to keep, per environment.
-    "build_cache_size": 10
+    // "build_cache_size": 10
 
     // The commits after which the regression search in `asv publish`
     // should start looking for regressions. Dictionary whose keys are
