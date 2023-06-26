@@ -1,7 +1,15 @@
 import setuptools
+import sys
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
+
+try:
+    import pybind11
+    pybind11
+except ImportError:
+    if call([sys.executable, '-m', 'pip', 'install', 'pybind11']):
+        raise RuntimeError('pybind11 install failed.')
 
 setuptools.setup(
     name="cvxpy-benchmarks",
