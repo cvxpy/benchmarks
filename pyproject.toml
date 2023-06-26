@@ -4,8 +4,5 @@ use_parentheses = true
 
 
 [build-system]
-requires = [
-  "setuptools>=42",
-  "pybind11"
-]
+requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
