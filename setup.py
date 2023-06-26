@@ -18,6 +18,7 @@ setuptools.setup(
     python_requires=">=3.7",
     license='Apache License, Version 2.0',
     install_requires=[
+        "pybind11",
         "cvxpy",
         "asv",
         "virtualenv",
