@@ -4,7 +4,7 @@ import numpy as np
 
 class QuantumHilbertMatrix:
     """
-    Taken from [...]
+    Composition of two quantum channels taken from equation #11 of https://arxiv.org/pdf/0904.4483.pdf
     """
 
     def setup(self):
@@ -22,10 +22,10 @@ class QuantumHilbertMatrix:
         rhs = sparse.random(m=dim**2,n=dim**2, density=0.05810546875)
         A = sparse.random(m=dim**2,n=dim**2, density=0.29058837890625)
 
-        IxA = sparse.kron(I,A) # doing this beforehand to decrease number of expressions in cvxpy cost function
+        AxI = sparse.kron(A, I) # doing this beforehand to decrease number of expressions in cvxpy cost function
 
         X = cp.Variable((dim**2,dim**2), PSD=True) # PSD variable
-        lhs =  cp.partial_trace(cp.kron(I, cp.partial_transpose(X, dims=[dim, dim], axis=0)) @ IxA, dims=[dim, dim, dim], axis=1)
+        lhs =  cp.partial_trace(cp.kron(I, cp.partial_transpose(X, dims=[dim, dim], axis=0)) @ AxI, dims=[dim, dim, dim], axis=1)
         cost = cp.sum_squares(lhs - rhs)
         problem = cp.Problem(cp.Minimize(cost))
         self.problem = problem
