@@ -39,7 +39,8 @@
         "ecos": [],
         "scs": [],
         "numpy": [],
-        "scipy": []
+        "scipy": [],
+        "pybind11": []
     },
 
     // The directory (relative to the current directory) that benchmarks are
