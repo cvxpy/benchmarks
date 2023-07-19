@@ -1,4 +1,5 @@
 # CVXPY benchmarks
+[![Build Status](http://github.com/cvxpy/benchmarks/workflows/build/badge.svg?event=push)](https://github.com/cvxpy/benchmarks/actions/workflows/build.yml)  
 Code and data related to CVXPY benchmarks.
 
 ## Motivation
