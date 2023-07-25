@@ -36,9 +36,37 @@ class SemidefiniteProgramming:
         # Create a symmetric matrix variable.
         X = cp.Variable((n, n), symmetric=True)
         constraints = [X >> 0]
-        constraints += [cp.trace(A[i]@X) == b[i] for i in range(p)]
-        objective = cp.Minimize(cp.trace(C@X))
+        constraints += [cp.trace(A[i] @ X) == b[i] for i in range(p)]
+        objective = cp.Minimize(cp.trace(C @ X))
         problem = cp.Problem(objective, constraints)
+        self.problem = problem
+
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)
+
+
+class SemidefiniteExample:
+
+    def setup(self):
+        def randn_symm(n):
+            A = np.random.randn(n, n)
+            return (A + A.T) / 2
+
+        def randn_psd(n):
+            A = 1. / 10 * np.random.randn(n, n)
+            return np.matmul(A, A.T)
+
+        n = 100
+        p = 100
+        C = randn_psd(n)
+        As = [randn_symm(n) for _ in range(p)]
+        Bs = np.random.randn(p)
+
+        X = cp.Variable((n, n), PSD=True)
+        objective = cp.trace(cp.matmul(C, X))
+        constraints = [
+            cp.trace(cp.matmul(As[i], X)) == Bs[i] for i in range(p)]
+        problem = cp.Problem(cp.Minimize(objective), constraints)
         self.problem = problem
 
     def time_compile_problem(self):
@@ -49,3 +77,7 @@ if __name__ == "__main__":
     sdp = SemidefiniteProgramming()
     sdp.setup()
     sdp.time_compile_problem()
+
+    prob = SemidefiniteExample()
+    prob.setup()
+    prob.time_compile_problem()
