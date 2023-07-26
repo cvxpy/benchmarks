@@ -34,7 +34,7 @@ class ConeMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing.apply(self.problem)
+        cp.ConeMatrixStuffing().apply(self.problem)
 
 
 class ParamConeMatrixStuffing:
@@ -59,7 +59,7 @@ class ParamConeMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing.apply(self.problem)
+        cp.ConeMatrixStuffing().apply(self.problem)
 
 
 class SmallMatrixStuffing:
@@ -81,7 +81,7 @@ class SmallMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing.apply(self.problem)
+        cp.ConeMatrixStuffing().apply(self.problem)
 
 
 class ParamSmallMatrixStuffing:
@@ -106,7 +106,7 @@ class ParamSmallMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing.apply(self.problem)
+        cp.ConeMatrixStuffing().apply(self.problem)
 
 
 if __name__ == "__main__":
