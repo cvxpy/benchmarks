@@ -1,7 +1,6 @@
+import cvxpy as cp
 from numpy.random import default_rng
 from scipy import sparse
-
-import cvxpy as cp
 
 
 class QuantumHilbertMatrix:
