@@ -11,8 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cvxpy as cp
 import numpy as np
+
+import cvxpy as cp
 
 
 class OptimalAdvertising:

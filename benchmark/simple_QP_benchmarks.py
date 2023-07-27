@@ -11,8 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import cvxpy as cp
 import numpy as np
+
+import cvxpy as cp
 
 
 class SimpleQPBenchmark():
@@ -30,7 +31,8 @@ class SimpleQPBenchmark():
         b = np.random.randn(p)
 
         x = cp.Variable(n)
-        problem = cp.Problem(cp.Minimize((1/2)*cp.quad_form(x, P, assume_PSD=True) + cp.matmul(q.T, x)),
+        problem = cp.Problem(cp.Minimize((1/2)*cp.quad_form(x, P, assume_PSD=True) +
+                                         cp.matmul(q.T, x)),
                        [cp.matmul(G, x) <= h,
                        cp.matmul(A, x) == b])
         self.problem = problem
