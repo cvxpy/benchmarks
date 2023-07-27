@@ -16,7 +16,7 @@ import numpy as np
 import scipy.sparse as sp
 
 
-class CVaRBenchmark():
+class CVaRBenchmark:
     timeout = 999
 
     def setup(self):
@@ -82,7 +82,42 @@ class CVaRBenchmark():
         self.problem.get_problem_data(solver=cp.SCS)
 
 
+class FactorCovarianceModel:
+    def setup(self):
+        n = 14500
+        m = 250
+        np.random.seed(1)
+        mu = np.abs(np.random.randn(n, 1))
+        Sigma_tilde = np.random.randn(m, m)
+        Sigma_tilde = Sigma_tilde.T.dot(Sigma_tilde)
+        D = sp.diags(np.random.uniform(0, 0.9, size=n))
+        F = np.random.randn(n, m)
+
+        # Factor model portfolio optimization.
+        w = cp.Variable(n)
+        f = cp.Variable(m)
+        self.gamma = cp.Parameter(nonneg=True)
+        self.Lmax = cp.Parameter()
+        ret = mu.T @ w
+        risk = cp.quad_form(f, Sigma_tilde, assume_PSD=True) + cp.sum_squares(np.sqrt(D) @ w)
+        objective = cp.Maximize(ret - self.gamma * risk)
+        constraints = [cp.sum(w) == 1, f == F.T @ w, cp.norm(w, 1) <= self.Lmax]
+        problem = cp.Problem(objective, constraints)
+        self.problem = problem
+
+    def time_compile_problem(self):
+        self.Lmax.value = 2
+        self.gamma.value = 0.1
+        self.problem.get_problem_data(solver=cp.SCS)
+
+
 if __name__ == '__main__':
     cvar = CVaRBenchmark()
     cvar.setup()
     cvar.time_compile_problem()
+    print(f"compilation time: {cvar.problem._compilation_time:.3f}")
+
+    factor_covariance = FactorCovarianceModel()
+    factor_covariance.setup()
+    factor_covariance.time_compile_problem()
+    print(f"compilation time: {factor_covariance.problem._compilation_time:.3f}")
