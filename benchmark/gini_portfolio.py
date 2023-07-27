@@ -13,26 +13,23 @@ limitations under the License.
 
 import cvxpy as cp
 import numpy as np
-import pandas as pd
 import scipy.stats as st
 
 
-class Yitzhaki():
+class Yitzhaki:
     def setup(self):
         rs = np.random.RandomState(123)
-        n = 100
-        cov = rs.rand(n, n) * 1.5 - 0.5
-        cov = cov @ cov.T/1000 + np.diag(rs.rand(n) * 0.7 + 0.3)/1000
-        mean = np.zeros(n) + 1/1000
-        Y = st.multivariate_normal.rvs(mean=mean, cov=cov, size=280, random_state=rs)
-        Y = pd.DataFrame(Y)
-        returns = Y.to_numpy()
-        assets = ['Asset ' + str(i) for i in range(1, n + 1)]
+        N = 10
+        T = 100
+        cov = rs.rand(N, N) * 1.5 - 0.5
+        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000
+        mean = np.zeros(N) + 1/1000
+        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)
+        assets = ['Asset ' + str(i) for i in range(1, N + 1)]
         D = np.array([]).reshape(0, len(assets))
         for j in range(0, returns.shape[0]-1):
             D = np.concatenate((D, returns[j+1:] - returns[j, :]), axis=0)
 
-        (T, N) = returns.shape
         d = cp.Variable((int(T * (T - 1) / 2), 1))
         w = cp.Variable((N, 1))
         constraints = []
@@ -50,18 +47,16 @@ class Yitzhaki():
         self.problem.get_problem_data(solver=cp.SCS)
 
 
-class Murray():
+class Murray:
     def setup(self):
         rs = np.random.RandomState(123)
-        n = 100
-        cov = rs.rand(n, n) * 1.5 - 0.5
-        cov = cov @ cov.T/1000 + np.diag(rs.rand(n) * 0.7 + 0.3)/1000
-        mean = np.zeros(n) + 1/1000
-        Y = st.multivariate_normal.rvs(mean=mean, cov=cov, size=750, random_state=rs)
-        Y = pd.DataFrame(Y)
-        returns = Y.to_numpy()
+        N = 10
+        T = 100
+        cov = rs.rand(N, N) * 1.5 - 0.5
+        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000
+        mean = np.zeros(N) + 1/1000
+        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)
 
-        (T, N) = returns.shape
         d = cp.Variable((int(T * (T - 1) / 2), 1))
         w = cp.Variable((N, 1))
         constraints = []
@@ -96,50 +91,51 @@ class Murray():
         self.problem.get_problem_data(solver=cp.SCS)
 
 
-# class Cajas():
-#     def setup(self, returns):
-#         rs = np.random.RandomState(123)
-#         n = 100
-#         cov = rs.rand(n,n) * 1.5 - 0.5
-#         cov = cov @ cov.T/1000 + np.diag(rs.rand(n) * 0.7 + 0.3)/1000
-#         mean = np.zeros(n) + 1/1000
-#         Y = st.multivariate_normal.rvs(mean=mean, cov=cov, size=500, random_state=rs)
-#         Y = pd.DataFrame(Y)
-#         returns = Y.to_numpy()
+class Cajas:
+    def setup(self):
+        rs = np.random.RandomState(123)
+        N = 10
+        T = 100
+        cov = rs.rand(N,N) * 1.5 - 0.5
+        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000
+        mean = np.zeros(N) + 1/1000
+        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)
 
-#         (T, N) = returns.shape
-#         w = cp.Variable((N,1))
-#         constraints = []
-#         a = cp.Variable((T,1))
-#         b = cp.Variable((T,1))
-#         y = cp.Variable((T,1))
-#         owa_w = []
-#         for i in range(1,T+1):
-#             owa_w.append(2*i - 1 - T)
-#         owa_w = np.array(owa_w) / (T * (T-1))
-#         constraints = [returns @ w == y,
-#                        w >= 0,
-#                        cp.sum(w) == 1]
-#         for i in range(T):
-#             constraints += [a[i] + b >= cp.multiply(owa_w[i], y)]
-#         risk = cp.sum(a + b)
-#         objective = cp.Minimize(risk * 1000)
-#         problem = cp.Problem(objective, constraints)
-#         self.problem = problem
+        w = cp.Variable((N,1))
+        constraints = []
+        a = cp.Variable((T,1))
+        b = cp.Variable((T,1))
+        y = cp.Variable((T,1))
+        owa_w = []
+        for i in range(1,T+1):
+            owa_w.append(2*i - 1 - T)
+        owa_w = np.array(owa_w) / (T * (T-1))
+        constraints = [returns @ w == y,
+                       w >= 0,
+                       cp.sum(w) == 1]
+        for i in range(T):
+            constraints += [a[i] + b >= cp.multiply(owa_w[i], y)]
+        risk = cp.sum(a + b)
+        objective = cp.Minimize(risk * 1000)
+        problem = cp.Problem(objective, constraints)
+        self.problem = problem
 
-#     def time_compile_problem(self):
-#         self.problem.get_problem_data(solver=cp.SCS)
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)
 
 
 if __name__ == "__main__":
     yitzhaki = Yitzhaki()
     yitzhaki.setup()
     yitzhaki.time_compile_problem()
+    print(f"compilation time: {yitzhaki.problem._compilation_time:.3f}")
 
     murray = Murray()
     murray.setup()
     murray.time_compile_problem()
+    print(f"compilation time: {murray.problem._compilation_time:.3f}")
 
-    # cajas = Cajas()
-    # cajas.setup()
-    # cajas.time_compile_problem()
+    cajas = Cajas()
+    cajas.setup()
+    cajas.time_compile_problem()
+    print(f"compilation time: {cajas.problem._compilation_time:.3f}")

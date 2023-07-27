@@ -99,7 +99,7 @@ class FactorCovarianceModel:
         self.gamma = cp.Parameter(nonneg=True)
         self.Lmax = cp.Parameter()
         ret = mu.T @ w
-        risk = cp.quad_form(f, Sigma_tilde) + cp.sum_squares(np.sqrt(D) @ w)
+        risk = cp.quad_form(f, Sigma_tilde, assume_PSD=True) + cp.sum_squares(np.sqrt(D) @ w)
         objective = cp.Maximize(ret - self.gamma * risk)
         constraints = [cp.sum(w) == 1, f == F.T @ w, cp.norm(w, 1) <= self.Lmax]
         problem = cp.Problem(objective, constraints)
@@ -115,7 +115,9 @@ if __name__ == '__main__':
     cvar = CVaRBenchmark()
     cvar.setup()
     cvar.time_compile_problem()
+    print(f"compilation time: {cvar.problem._compilation_time:.3f}")
 
     factor_covariance = FactorCovarianceModel()
     factor_covariance.setup()
     factor_covariance.time_compile_problem()
+    print(f"compilation time: {factor_covariance.problem._compilation_time:.3f}")
