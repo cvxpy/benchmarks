@@ -36,8 +36,8 @@ class SemidefiniteProgramming:
         # Create a symmetric matrix variable.
         X = cp.Variable((n, n), symmetric=True)
         constraints = [X >> 0]
-        constraints += [cp.trace(A[i]@X) == b[i] for i in range(p)]
-        objective = cp.Minimize(cp.trace(C@X))
+        constraints += [cp.trace(A[i] @ X) == b[i] for i in range(p)]
+        objective = cp.Minimize(cp.trace(C @ X))
         problem = cp.Problem(objective, constraints)
         self.problem = problem
 
@@ -49,3 +49,4 @@ if __name__ == "__main__":
     sdp = SemidefiniteProgramming()
     sdp.setup()
     sdp.time_compile_problem()
+    print(f"compilation time: {sdp.problem._compilation_time:.3f}")
