@@ -40,8 +40,8 @@ class ConeMatrixStuffing:
 class ParamConeMatrixStuffing:
 
     def setup(self):
-        m = 2000
-        n = 2000
+        m = 200
+        n = 200
         A = cp.Parameter((m, n))
         C = cp.Parameter(m // 2)
         b = cp.Parameter(m)
@@ -87,8 +87,8 @@ class SmallMatrixStuffing:
 class ParamSmallMatrixStuffing:
 
     def setup(self):
-        m = 200
-        n = 200
+        m = 100
+        n = 100
         A = cp.Parameter((m, n))
         C = cp.Parameter(m // 2)
         b = cp.Parameter(m)
