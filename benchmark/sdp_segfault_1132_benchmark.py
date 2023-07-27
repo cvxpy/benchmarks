@@ -16,7 +16,7 @@ import numpy as np
 import cvxpy as cp
 
 
-class SDPSegfault1132Benchmark():
+class SDPSegfault1132Benchmark:
     timeout = 999
 
     def setup(self):

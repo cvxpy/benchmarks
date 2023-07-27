@@ -16,7 +16,7 @@ import numpy as np
 import cvxpy as cp
 
 
-class SlowPruningBenchmark():
+class SlowPruningBenchmark:
 
     def setup(self):
         """Regression test for https://github.com/cvxpy/cvxpy/issues/1668

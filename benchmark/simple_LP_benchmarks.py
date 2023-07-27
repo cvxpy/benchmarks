@@ -16,7 +16,7 @@ import numpy as np
 import cvxpy as cp
 
 
-class SimpleLPBenchmark():
+class SimpleLPBenchmark:
     def setup(self):
         n = int(1e7)
         c = np.arange(n)
@@ -30,7 +30,7 @@ class SimpleLPBenchmark():
         self.problem.get_problem_data(solver=cp.SCS)
 
 
-class SimpleFullyParametrizedLPBenchmark():
+class SimpleFullyParametrizedLPBenchmark:
     def setup(self):
         n = int(1e4)
         p = cp.Parameter(n)
@@ -44,7 +44,7 @@ class SimpleFullyParametrizedLPBenchmark():
         self.problem.get_problem_data(solver=cp.SCS)
 
 
-class SimpleScalarParametrizedLPBenchmark():
+class SimpleScalarParametrizedLPBenchmark:
     def setup(self):
         n = int(1e6)
         p = cp.Parameter()
