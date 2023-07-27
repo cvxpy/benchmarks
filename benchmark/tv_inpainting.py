@@ -47,3 +47,4 @@ if __name__ == '__main__':
     prob = TvInpainting()
     prob.setup()
     prob.time_compile_problem()
+    print(f"compilation time: {prob.problem._compilation_time:.3f}")

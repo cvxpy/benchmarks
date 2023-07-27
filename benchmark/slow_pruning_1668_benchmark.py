@@ -37,10 +37,11 @@ class SlowPruningBenchmark():
         self.problem = problem
 
     def time_compile_problem(self):
-        self.problem.get_problem_data(solver=cp.ECOS)
+        self.problem.get_problem_data(solver=cp.SCS)
 
 
 if __name__ == '__main__':
     issue_1668 = SlowPruningBenchmark()
     issue_1668.setup()
     issue_1668.time_compile_problem()
+    print(f"compilation time: {issue_1668.problem._compilation_time:.3f}")

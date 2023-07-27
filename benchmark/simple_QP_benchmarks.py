@@ -17,8 +17,8 @@ import numpy as np
 
 class SimpleQPBenchmark():
     def setup(self):
-        m = 15
-        n = 10
+        m = 150
+        n = 100
         p = 5
         P = np.random.randn(n, n)
         P = np.matmul(P.T, P)
@@ -58,8 +58,8 @@ class ParametrizedQPBenchmark():
 
 class LeastSquares():
     def setup(self):
-        m = 20
-        n = 15
+        m = 5000
+        n = 500
         A = np.random.randn(m, n)
         b = np.random.randn(m)
 
@@ -76,11 +76,14 @@ if __name__ == '__main__':
     simple_qp = SimpleQPBenchmark()
     simple_qp.setup()
     simple_qp.time_compile_problem()
+    print(f"compilation time: {simple_qp.problem._compilation_time:.3f}")
 
     param_qp = ParametrizedQPBenchmark()
     param_qp.setup()
     param_qp.time_compile_problem()
+    print(f"compilation time: {param_qp.problem._compilation_time:.3f}")
 
     least_squares = LeastSquares()
     least_squares.setup()
     least_squares.time_compile_problem()
+    print(f"compilation time: {least_squares.problem._compilation_time:.3f}")
