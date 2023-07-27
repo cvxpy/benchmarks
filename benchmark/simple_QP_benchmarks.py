@@ -17,9 +17,10 @@ import numpy as np
 
 class SimpleQPBenchmark():
     def setup(self):
-        m = 150
-        n = 100
+        m = 2000
+        n = 400
         p = 5
+        np.random.seed(1)
         P = np.random.randn(n, n)
         P = np.matmul(P.T, P)
         q = np.random.randn(n)
@@ -29,7 +30,7 @@ class SimpleQPBenchmark():
         b = np.random.randn(p)
 
         x = cp.Variable(n)
-        problem = cp.Problem(cp.Minimize((1/2)*cp.quad_form(x, P) + cp.matmul(q.T, x)),
+        problem = cp.Problem(cp.Minimize((1/2)*cp.quad_form(x, P, assume_PSD=True) + cp.matmul(q.T, x)),
                        [cp.matmul(G, x) <= h,
                        cp.matmul(A, x) == b])
         self.problem = problem
@@ -40,7 +41,7 @@ class SimpleQPBenchmark():
 
 class ParametrizedQPBenchmark():
     def setup(self):
-        m = 150
+        m = 250
         n = 100
         np.random.seed(1)
         A = cp.Parameter((m, n))
@@ -59,7 +60,8 @@ class ParametrizedQPBenchmark():
 class LeastSquares():
     def setup(self):
         m = 5000
-        n = 500
+        n = 1000
+        np.random.seed(1)
         A = np.random.randn(m, n)
         b = np.random.randn(m)
 
