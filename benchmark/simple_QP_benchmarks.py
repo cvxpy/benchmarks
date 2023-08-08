@@ -16,7 +16,7 @@ import numpy as np
 from scipy.linalg import dft
 
 
-class SimpleQPBenchmark():
+class SimpleQPBenchmark:
     def setup(self):
         m = 2000
         n = 400
@@ -41,7 +41,7 @@ class SimpleQPBenchmark():
         self.problem.get_problem_data(solver=cp.OSQP)
 
 
-class ParametrizedQPBenchmark():
+class ParametrizedQPBenchmark:
     def setup(self):
         m = 250
         n = 100
@@ -59,7 +59,7 @@ class ParametrizedQPBenchmark():
         self.problem.get_problem_data(solver=cp.OSQP)
 
 
-class LeastSquares():
+class LeastSquares:
     def setup(self):
         m = 5000
         n = 1000

@@ -15,7 +15,7 @@ asv run
 ```
 To run a particular benchmark use:
 ```
-asv run --bench cvar_benchmark.CVaRBenchmark
+asv run --bench CVaRBenchmark
 ```
 You can also collect and view the results on a viewable website:
 ```

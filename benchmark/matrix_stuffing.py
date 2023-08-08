@@ -11,12 +11,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
-
 import cvxpy as cp
+import numpy as np
+from cvxpy.reductions.dcp2cone.cone_matrix_stuffing import ConeMatrixStuffing
 
 
-class ConeMatrixStuffing:
+class ConeMatrixStuffingBench:
 
     def setup(self):
         m = 2000
@@ -35,7 +35,8 @@ class ConeMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing().apply(self.problem)
+        cms = ConeMatrixStuffing()
+        cms.apply(self.problem)
 
 
 class ParamConeMatrixStuffing:
@@ -60,7 +61,8 @@ class ParamConeMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing().apply(self.problem)
+        cms = ConeMatrixStuffing()
+        cms.apply(self.problem)
 
 
 class SmallMatrixStuffing:
@@ -82,7 +84,8 @@ class SmallMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing().apply(self.problem)
+        cms = ConeMatrixStuffing()
+        cms.apply(self.problem)
 
 
 class ParamSmallMatrixStuffing:
@@ -107,7 +110,8 @@ class ParamSmallMatrixStuffing:
         self.problem = problem
 
     def time_compile_problem(self):
-        cp.ConeMatrixStuffing().apply(self.problem)
+        cms = ConeMatrixStuffing()
+        cms.apply(self.problem)
 
 
 if __name__ == "__main__":
