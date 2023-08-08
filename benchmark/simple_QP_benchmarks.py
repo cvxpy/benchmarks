@@ -11,9 +11,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import numpy as np
-
 import cvxpy as cp
+import numpy as np
+from scipy.linalg import dft
 
 
 class SimpleQPBenchmark():
@@ -31,10 +31,10 @@ class SimpleQPBenchmark():
         b = np.random.randn(p)
 
         x = cp.Variable(n)
-        problem = cp.Problem(cp.Minimize((1/2)*cp.quad_form(x, P, assume_PSD=True) +
+        problem = cp.Problem(cp.Minimize((1 / 2) * cp.quad_form(x, P, assume_PSD=True) +
                                          cp.matmul(q.T, x)),
-                       [cp.matmul(G, x) <= h,
-                       cp.matmul(A, x) == b])
+                             [cp.matmul(G, x) <= h,
+                              cp.matmul(A, x) == b])
         self.problem = problem
 
     def time_compile_problem(self):
@@ -50,7 +50,7 @@ class ParametrizedQPBenchmark():
         b = cp.Parameter((m,))
 
         x = cp.Variable(n)
-        objective = cp.Minimize(cp.sum_squares(A@x - b))
+        objective = cp.Minimize(cp.sum_squares(A @ x - b))
         constraints = [0 <= x, x <= 1]
         problem = cp.Problem(objective, constraints)
         self.problem = problem
@@ -76,6 +76,37 @@ class LeastSquares():
         self.problem.get_problem_data(solver=cp.OSQP)
 
 
+class UnconstrainedQP():
+    """
+    Related issue: https://github.com/cvxpy/cvxpy/issues/2205
+    """
+    def setup(self):
+        N_r = 16
+        N_t = 2
+        N_s = 10
+
+        x = np.random.randint(2, size=N_s * N_r * N_t)
+
+        H = dft(N_s * N_r * N_t) * 1j
+        H_H = H.conj().T
+
+        err = np.random.random(N_r)
+        Err = np.kron(np.diag(np.ones(N_s * N_t)), np.diag(err))
+
+        y = H_H @ Err @ H @ x
+
+        var = cp.Variable(shape=(N_r), complex=True)
+        Err_est = cp.kron(np.diag(np.ones(N_s * N_t)), cp.diag(var))
+
+        res = cp.norm2(H_H @ Err_est @ H @ x - y)
+
+        problem = cp.Problem(cp.Minimize(res))
+        self.problem = problem
+
+    def time_compile_problem(self):
+        self.problem.get_problem_data(solver=cp.SCS)
+
+
 if __name__ == '__main__':
     simple_qp = SimpleQPBenchmark()
     simple_qp.setup()
@@ -91,3 +122,8 @@ if __name__ == '__main__':
     least_squares.setup()
     least_squares.time_compile_problem()
     print(f"compilation time: {least_squares.problem._compilation_time:.3f}")
+
+    unconstrained = UnconstrainedQP()
+    unconstrained.setup()
+    unconstrained.time_compile_problem()
+    print(f"compilation time: {unconstrained.problem._compilation_time:.3f}")
