@@ -83,7 +83,7 @@ class UnconstrainedQP:
     def setup(self):
         N_r = 16
         N_t = 2
-        N_s = 10
+        N_s = 6
 
         x = np.random.randint(2, size=N_s * N_r * N_t)
 
