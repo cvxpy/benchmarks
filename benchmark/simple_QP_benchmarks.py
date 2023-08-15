@@ -76,7 +76,7 @@ class LeastSquares:
         self.problem.get_problem_data(solver=cp.OSQP)
 
 
-class UnconstrainedQP():
+class UnconstrainedQP:
     """
     Related issue: https://github.com/cvxpy/cvxpy/issues/2205
     """
