@@ -304,7 +304,7 @@
         "warmup_time": -1
     },
     "simple_QP_benchmarks.ParametrizedQPBenchmark.time_compile_problem": {
-        "code": "class ParametrizedQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 250\n        n = 100\n        np.random.seed(1)\n        A = cp.Parameter((m, n))\n        b = cp.Parameter((m,))\n    \n        x = cp.Variable(n)\n        objective = cp.Minimize(cp.sum_squares(A@x - b))\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class ParametrizedQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 250\n        n = 100\n        np.random.seed(1)\n        A = cp.Parameter((m, n))\n        b = cp.Parameter((m,))\n    \n        x = cp.Variable(n)\n        objective = cp.Minimize(cp.sum_squares(A @ x - b))\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_QP_benchmarks.ParametrizedQPBenchmark.time_compile_problem",
         "number": 0,
@@ -316,11 +316,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "45f8e4bdac6459941852b20ed13605093901c6a5697e91a0c378aee939754277",
+        "version": "36472f339d84464f1e377c9506cb50ecd65a0e06ed4d9eca2ffce97b5cb11423",
         "warmup_time": -1
     },
     "simple_QP_benchmarks.SimpleQPBenchmark.time_compile_problem": {
-        "code": "class SimpleQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 2000\n        n = 400\n        p = 5\n        np.random.seed(1)\n        P = np.random.randn(n, n)\n        P = np.matmul(P.T, P)\n        q = np.random.randn(n)\n        G = np.random.randn(m, n)\n        h = np.matmul(G, np.random.randn(n))\n        A = np.random.randn(p, n)\n        b = np.random.randn(p)\n    \n        x = cp.Variable(n)\n        problem = cp.Problem(cp.Minimize((1/2)*cp.quad_form(x, P, assume_PSD=True) +\n                                         cp.matmul(q.T, x)),\n                       [cp.matmul(G, x) <= h,\n                       cp.matmul(A, x) == b])\n        self.problem = problem",
+        "code": "class SimpleQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 2000\n        n = 400\n        p = 5\n        np.random.seed(1)\n        P = np.random.randn(n, n)\n        P = np.matmul(P.T, P)\n        q = np.random.randn(n)\n        G = np.random.randn(m, n)\n        h = np.matmul(G, np.random.randn(n))\n        A = np.random.randn(p, n)\n        b = np.random.randn(p)\n    \n        x = cp.Variable(n)\n        problem = cp.Problem(cp.Minimize((1 / 2) * cp.quad_form(x, P, assume_PSD=True) +\n                                         cp.matmul(q.T, x)),\n                             [cp.matmul(G, x) <= h,\n                              cp.matmul(A, x) == b])\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_QP_benchmarks.SimpleQPBenchmark.time_compile_problem",
         "number": 0,
@@ -332,7 +332,23 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "ea0dd301c0877b3ceaf3230552bf2ea1d364065972d99f9c48392a3b5ce8248b",
+        "version": "5bb63593b1e46938dfb8ae3467c4ffdf42583fe6a97e92734161e86d0df2ee6e",
+        "warmup_time": -1
+    },
+    "simple_QP_benchmarks.UnconstrainedQP.time_compile_problem": {
+        "code": "class UnconstrainedQP:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        N_r = 16\n        N_t = 2\n        N_s = 6\n    \n        x = np.random.randint(2, size=N_s * N_r * N_t)\n    \n        H = dft(N_s * N_r * N_t) * 1j\n        H_H = H.conj().T\n    \n        err = np.random.random(N_r)\n        Err = np.kron(np.diag(np.ones(N_s * N_t)), np.diag(err))\n    \n        y = H_H @ Err @ H @ x\n    \n        var = cp.Variable(shape=(N_r), complex=True)\n        Err_est = cp.kron(np.diag(np.ones(N_s * N_t)), cp.diag(var))\n    \n        res = cp.norm2(H_H @ Err_est @ H @ x - y)\n    \n        problem = cp.Problem(cp.Minimize(res))\n        self.problem = problem",
+        "min_run_count": 2,
+        "name": "simple_QP_benchmarks.UnconstrainedQP.time_compile_problem",
+        "number": 0,
+        "param_names": [],
+        "params": [],
+        "repeat": 0,
+        "rounds": 2,
+        "sample_time": 0.01,
+        "timeout": 60.0,
+        "type": "time",
+        "unit": "seconds",
+        "version": "27046933d1d1fd5cf23189b6ce8bad5798f552613ac37bbbf517fba0d7083efb",
         "warmup_time": -1
     },
     "slow_pruning_1668_benchmark.SlowPruningBenchmark.time_compile_problem": {
