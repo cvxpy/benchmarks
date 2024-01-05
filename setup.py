@@ -15,11 +15,12 @@ setuptools.setup(
     },
     package_dir={"": "benchmark"},
     packages=setuptools.find_packages(where="benchmark"),
-    python_requires=">=3.7",
+    python_requires=">=3.9",
     license='Apache License, Version 2.0',
     install_requires=[
         "cvxpy",
         "asv<0.6",
         "virtualenv",
+        "python-graphblas",
     ],
 )
