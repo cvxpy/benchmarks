@@ -13,6 +13,10 @@ Then run the benchmarks against the latest commit on CVXPY by:
 ```
 asv run
 ```
+Optionally, you can run ``asv dev`` to ensure the code is running smoothly. It is equivalent to the following command:
+```
+asv run --python=same --quick --show-stderr --dry-run
+```
 To run a particular benchmark use:
 ```
 asv run --bench CVaRBenchmark
