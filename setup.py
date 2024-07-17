@@ -15,7 +15,7 @@ setuptools.setup(
     },
     package_dir={"": "benchmark"},
     packages=setuptools.find_packages(where="benchmark"),
-    python_requires=">=3.9",
+    python_requires=">=3.8",
     license='Apache License, Version 2.0',
     install_requires=[
         "cvxpy",

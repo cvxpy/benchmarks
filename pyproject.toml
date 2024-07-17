@@ -7,7 +7,7 @@ exclude = [
     "*__init__.py"
 ]
 # The minimum Python version that should be supported
-target-version = "py39"
+target-version = "py38"
 
 [build-system]
 requires = ["setuptools>=42"]
