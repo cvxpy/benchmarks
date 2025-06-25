@@ -21,5 +21,8 @@ setuptools.setup(
         "cvxpy",
         "asv<0.6",
         "virtualenv",
+        "clarabel",
+        "scs",
+        "osqp",
     ],
 )
