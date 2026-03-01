@@ -36,7 +36,7 @@
     //
     "matrix": {
         "osqp": [],
-        "ecos": [],
+        "clarabel": [],
         "scs": [],
         "numpy": [],
         "scipy": [],
