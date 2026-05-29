@@ -20,7 +20,7 @@ class Yitzhaki:
     def setup(self):
         rs = np.random.RandomState(123)
         N = 50
-        T = 150
+        T = 300
         cov = rs.rand(N, N) * 1.5 - 0.5
         cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000
         mean = np.zeros(N) + 1/1000
@@ -51,7 +51,7 @@ class Murray:
     def setup(self):
         rs = np.random.RandomState(123)
         N = 50
-        T = 350
+        T = 700
         cov = rs.rand(N, N) * 1.5 - 0.5
         cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000
         mean = np.zeros(N) + 1/1000
@@ -95,7 +95,7 @@ class Cajas:
     def setup(self):
         rs = np.random.RandomState(123)
         N = 50
-        T = 350
+        T = 800
         cov = rs.rand(N,N) * 1.5 - 0.5
         cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000
         mean = np.zeros(N) + 1/1000

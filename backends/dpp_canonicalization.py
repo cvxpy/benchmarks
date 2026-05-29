@@ -42,9 +42,8 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable
 
-import numpy as np
-
 import cvxpy as cp
+import numpy as np
 
 # Optional imports
 try:
@@ -1184,8 +1183,12 @@ def main():
         profile_problems = {
             "dpp_lasso_small": ("DPP LASSO (50x100)", make_dpp_lasso(50, 100)),
             "dpp_lasso_medium": ("DPP LASSO (200x500)", make_dpp_lasso(200, 500)),
-            "dpp_constraint_medium": ("DPP Constraint (500x200)", make_dpp_constraint_matrix(200, 500)),
-            "dpp_constraint_large": ("DPP Constraint (1000x500)", make_dpp_constraint_matrix(500, 1000)),
+            "dpp_constraint_medium": (
+                "DPP Constraint (500x200)", make_dpp_constraint_matrix(200, 500)
+            ),
+            "dpp_constraint_large": (
+                "DPP Constraint (1000x500)", make_dpp_constraint_matrix(500, 1000)
+            ),
         }
         if args.profile in profile_problems:
             name, factory = profile_problems[args.profile]

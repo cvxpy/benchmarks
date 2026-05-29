@@ -22,10 +22,10 @@ class SlowPruningBenchmark:
 
         Pruning matrices caused order-of-magnitude slow downs in compilation times.
         """
-        s = 2000
-        t = 10
+        s = 4000
+        t = 20
         x = np.linspace(-100.0, 100.0, s)
-        rows = 50
+        rows = 100
         var = cp.Variable(shape=(rows, t))
 
         cost = cp.sum_squares(

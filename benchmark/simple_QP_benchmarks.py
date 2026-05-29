@@ -18,9 +18,9 @@ from scipy.linalg import dft
 
 class SimpleQPBenchmark:
     def setup(self):
-        m = 2000
-        n = 400
-        p = 5
+        m = 8000
+        n = 1600
+        p = 20
         np.random.seed(1)
         P = np.random.randn(n, n)
         P = np.matmul(P.T, P)
@@ -43,8 +43,8 @@ class SimpleQPBenchmark:
 
 class ParametrizedQPBenchmark:
     def setup(self):
-        m = 250
-        n = 100
+        m = 6000
+        n = 2400
         np.random.seed(1)
         A = cp.Parameter((m, n))
         b = cp.Parameter((m,))
@@ -61,8 +61,8 @@ class ParametrizedQPBenchmark:
 
 class LeastSquares:
     def setup(self):
-        m = 5000
-        n = 1000
+        m = 7000
+        n = 2000
         np.random.seed(1)
         A = np.random.randn(m, n)
         b = np.random.randn(m)
@@ -81,9 +81,9 @@ class UnconstrainedQP:
     Related issue: https://github.com/cvxpy/cvxpy/issues/2205
     """
     def setup(self):
-        N_r = 16
+        N_r = 18
         N_t = 2
-        N_s = 6
+        N_s = 7
 
         x = np.random.randint(2, size=N_s * N_r * N_t)
 

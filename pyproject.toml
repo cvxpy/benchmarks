@@ -1,13 +1,17 @@
 [tool.ruff]
-select = ["E", "F", "I"]
 line-length = 100
 exclude = [
     "build",
     "doc",
     "*__init__.py"
 ]
-# The minimum Python version that should be supported
-target-version = "py37"
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.ruff.lint.isort]
+known-third-party = ["cvxpy"]
 
 [build-system]
 requires = ["setuptools>=42"]

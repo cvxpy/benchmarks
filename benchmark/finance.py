@@ -84,7 +84,7 @@ class CVaRBenchmark:
 
 class FactorCovarianceModel:
     def setup(self):
-        n = 14500
+        n = 25000
         m = 250
         np.random.seed(1)
         mu = np.abs(np.random.randn(n, 1))
