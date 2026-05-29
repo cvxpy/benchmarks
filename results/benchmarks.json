@@ -16,7 +16,7 @@
         "warmup_time": -1
     },
     "finance.FactorCovarianceModel.time_compile_problem": {
-        "code": "class FactorCovarianceModel:\n    def time_compile_problem(self):\n        self.Lmax.value = 2\n        self.gamma.value = 0.1\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        n = 14500\n        m = 250\n        np.random.seed(1)\n        mu = np.abs(np.random.randn(n, 1))\n        Sigma_tilde = np.random.randn(m, m)\n        Sigma_tilde = Sigma_tilde.T.dot(Sigma_tilde)\n        D = sp.diags(np.random.uniform(0, 0.9, size=n))\n        F = np.random.randn(n, m)\n    \n        # Factor model portfolio optimization.\n        w = cp.Variable(n)\n        f = cp.Variable(m)\n        self.gamma = cp.Parameter(nonneg=True)\n        self.Lmax = cp.Parameter()\n        ret = mu.T @ w\n        risk = cp.quad_form(f, Sigma_tilde, assume_PSD=True) + cp.sum_squares(np.sqrt(D) @ w)\n        objective = cp.Maximize(ret - self.gamma * risk)\n        constraints = [cp.sum(w) == 1, f == F.T @ w, cp.norm(w, 1) <= self.Lmax]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class FactorCovarianceModel:\n    def time_compile_problem(self):\n        self.Lmax.value = 2\n        self.gamma.value = 0.1\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        n = 25000\n        m = 250\n        np.random.seed(1)\n        mu = np.abs(np.random.randn(n, 1))\n        Sigma_tilde = np.random.randn(m, m)\n        Sigma_tilde = Sigma_tilde.T.dot(Sigma_tilde)\n        D = sp.diags(np.random.uniform(0, 0.9, size=n))\n        F = np.random.randn(n, m)\n    \n        # Factor model portfolio optimization.\n        w = cp.Variable(n)\n        f = cp.Variable(m)\n        self.gamma = cp.Parameter(nonneg=True)\n        self.Lmax = cp.Parameter()\n        ret = mu.T @ w\n        risk = cp.quad_form(f, Sigma_tilde, assume_PSD=True) + cp.sum_squares(np.sqrt(D) @ w)\n        objective = cp.Maximize(ret - self.gamma * risk)\n        constraints = [cp.sum(w) == 1, f == F.T @ w, cp.norm(w, 1) <= self.Lmax]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "finance.FactorCovarianceModel.time_compile_problem",
         "number": 0,
@@ -28,11 +28,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "05132bd6e29e6e5d0fb509a69889005e56a9f1cce65b2369b4881a41e0a2ad6d",
+        "version": "7b30570f2b4014c04fa0b12006278c62e0f98767b398f695e31eedf2357ec0e1",
         "warmup_time": -1
     },
     "gini_portfolio.Cajas.time_compile_problem": {
-        "code": "class Cajas:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        rs = np.random.RandomState(123)\n        N = 50\n        T = 350\n        cov = rs.rand(N,N) * 1.5 - 0.5\n        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000\n        mean = np.zeros(N) + 1/1000\n        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)\n    \n        w = cp.Variable((N,1))\n        constraints = []\n        a = cp.Variable((T,1))\n        b = cp.Variable((T,1))\n        y = cp.Variable((T,1))\n        owa_w = []\n        for i in range(1,T+1):\n            owa_w.append(2*i - 1 - T)\n        owa_w = np.array(owa_w) / (T * (T-1))\n        constraints = [returns @ w == y,\n                       w >= 0,\n                       cp.sum(w) == 1]\n        for i in range(T):\n            constraints += [a[i] + b >= cp.multiply(owa_w[i], y)]\n        risk = cp.sum(a + b)\n        objective = cp.Minimize(risk * 1000)\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class Cajas:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        rs = np.random.RandomState(123)\n        N = 50\n        T = 800\n        cov = rs.rand(N,N) * 1.5 - 0.5\n        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000\n        mean = np.zeros(N) + 1/1000\n        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)\n    \n        w = cp.Variable((N,1))\n        constraints = []\n        a = cp.Variable((T,1))\n        b = cp.Variable((T,1))\n        y = cp.Variable((T,1))\n        owa_w = []\n        for i in range(1,T+1):\n            owa_w.append(2*i - 1 - T)\n        owa_w = np.array(owa_w) / (T * (T-1))\n        constraints = [returns @ w == y,\n                       w >= 0,\n                       cp.sum(w) == 1]\n        for i in range(T):\n            constraints += [a[i] + b >= cp.multiply(owa_w[i], y)]\n        risk = cp.sum(a + b)\n        objective = cp.Minimize(risk * 1000)\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "gini_portfolio.Cajas.time_compile_problem",
         "number": 0,
@@ -44,11 +44,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "f73882f5ed1e93da259896f54d6c7fa2f2684002ff47c9b4354e1a607c04eefd",
+        "version": "ef52c6480cbc3d92a7e06b4d33ee5e266462ca0b26daaa4aa2745b28d889bee7",
         "warmup_time": -1
     },
     "gini_portfolio.Murray.time_compile_problem": {
-        "code": "class Murray:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        rs = np.random.RandomState(123)\n        N = 50\n        T = 350\n        cov = rs.rand(N, N) * 1.5 - 0.5\n        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000\n        mean = np.zeros(N) + 1/1000\n        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)\n    \n        d = cp.Variable((int(T * (T - 1) / 2), 1))\n        w = cp.Variable((N, 1))\n        constraints = []\n        ret_w = cp.Variable((T, 1))\n        constraints.append(ret_w == returns @ w)\n        mat = np.zeros((d.shape[0], T))\n        \"\"\"\n        We need to create a vector that has the following entries:\n            ret_w[i] - ret_w[j]\n        for j in range(T), for i in range(j+1, T).\n        We do this by building a numpy array of mostly 0's and 1's.\n        (It would be better to use SciPy sparse matrix objects.)\n        \"\"\"\n        ell = 0\n        for j in range(T):\n            for i in range(j + 1, T):\n                # write to mat so that (mat @ ret_w)[ell] == var_i - var_j\n                mat[ell, i] = 1\n                mat[ell, j] = -1\n                ell += 1\n        all_pairs_ret_diff = mat @ ret_w\n        constraints += [d >= all_pairs_ret_diff,\n                        d >= -all_pairs_ret_diff,\n                        w >= 0,\n                        cp.sum(w) == 1]\n        risk = cp.sum(d) / ((T - 1) * T)\n        objective = cp.Minimize(risk * 1000)\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class Murray:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        rs = np.random.RandomState(123)\n        N = 50\n        T = 700\n        cov = rs.rand(N, N) * 1.5 - 0.5\n        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000\n        mean = np.zeros(N) + 1/1000\n        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)\n    \n        d = cp.Variable((int(T * (T - 1) / 2), 1))\n        w = cp.Variable((N, 1))\n        constraints = []\n        ret_w = cp.Variable((T, 1))\n        constraints.append(ret_w == returns @ w)\n        mat = np.zeros((d.shape[0], T))\n        \"\"\"\n        We need to create a vector that has the following entries:\n            ret_w[i] - ret_w[j]\n        for j in range(T), for i in range(j+1, T).\n        We do this by building a numpy array of mostly 0's and 1's.\n        (It would be better to use SciPy sparse matrix objects.)\n        \"\"\"\n        ell = 0\n        for j in range(T):\n            for i in range(j + 1, T):\n                # write to mat so that (mat @ ret_w)[ell] == var_i - var_j\n                mat[ell, i] = 1\n                mat[ell, j] = -1\n                ell += 1\n        all_pairs_ret_diff = mat @ ret_w\n        constraints += [d >= all_pairs_ret_diff,\n                        d >= -all_pairs_ret_diff,\n                        w >= 0,\n                        cp.sum(w) == 1]\n        risk = cp.sum(d) / ((T - 1) * T)\n        objective = cp.Minimize(risk * 1000)\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "gini_portfolio.Murray.time_compile_problem",
         "number": 0,
@@ -60,11 +60,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "8cfb1206dbc330b898207e296b54520e413bbbf8d0e6d24dbc616a5663846716",
+        "version": "3b58be057f5faae3b294b9b9235a7c6ca211ab1616cb7f1b639fd9d66b234acd",
         "warmup_time": -1
     },
     "gini_portfolio.Yitzhaki.time_compile_problem": {
-        "code": "class Yitzhaki:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        rs = np.random.RandomState(123)\n        N = 50\n        T = 150\n        cov = rs.rand(N, N) * 1.5 - 0.5\n        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000\n        mean = np.zeros(N) + 1/1000\n        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)\n        assets = ['Asset ' + str(i) for i in range(1, N + 1)]\n        D = np.array([]).reshape(0, len(assets))\n        for j in range(0, returns.shape[0]-1):\n            D = np.concatenate((D, returns[j+1:] - returns[j, :]), axis=0)\n    \n        d = cp.Variable((int(T * (T - 1) / 2), 1))\n        w = cp.Variable((N, 1))\n        constraints = []\n        all_pairs_ret_diff = D @ w\n        constraints += [d >= all_pairs_ret_diff,\n                        d >= -all_pairs_ret_diff,\n                        w >= 0,\n                        cp.sum(w) == 1]\n        risk = cp.sum(d) / ((T - 1) * T)\n        objective = cp.Minimize(risk * 1000)\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class Yitzhaki:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        rs = np.random.RandomState(123)\n        N = 50\n        T = 300\n        cov = rs.rand(N, N) * 1.5 - 0.5\n        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000\n        mean = np.zeros(N) + 1/1000\n        returns = st.multivariate_normal.rvs(mean=mean, cov=cov, size=T, random_state=rs)\n        assets = ['Asset ' + str(i) for i in range(1, N + 1)]\n        D = np.array([]).reshape(0, len(assets))\n        for j in range(0, returns.shape[0]-1):\n            D = np.concatenate((D, returns[j+1:] - returns[j, :]), axis=0)\n    \n        d = cp.Variable((int(T * (T - 1) / 2), 1))\n        w = cp.Variable((N, 1))\n        constraints = []\n        all_pairs_ret_diff = D @ w\n        constraints += [d >= all_pairs_ret_diff,\n                        d >= -all_pairs_ret_diff,\n                        w >= 0,\n                        cp.sum(w) == 1]\n        risk = cp.sum(d) / ((T - 1) * T)\n        objective = cp.Minimize(risk * 1000)\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "gini_portfolio.Yitzhaki.time_compile_problem",
         "number": 0,
@@ -76,11 +76,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "7cc5581008142caaccffd2307bc2f406b6984042d224f9c61979bc06835538c1",
+        "version": "ba9f0d279c83c9a11e5c8db2000d9d482a9d633b0cd01ce4aa8a16e3b56770b6",
         "warmup_time": -1
     },
     "high_dim_convex_plasticity.ConvexPlasticity.time_compile_problem": {
-        "code": "class ConvexPlasticity:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        E_dim = 70e3  # [Pa]\n        E = 70e3 / E_dim  # [-] Young's modulus\n        nu = 0.3  # [-] Poisson's ratio\n        sig0 = 250 / E_dim  # [-] yield strength\n        Et = E / 100.0  # [-] tangent modulus\n        H = E * Et / (E - Et)  # [-] hardening modulus\n    \n        l, m = E * nu / (1 + nu) / (1 - 2 * nu), E / 2 / (1 + nu)  # noqa: E741\n    \n        # Elasticity stiffness matrix\n        C = np.array(\n            [\n                [l + 2 * m, l, l, 0],\n                [l, l + 2 * m, l, 0],\n                [l, l, l + 2 * m, 0],\n                [0, 0, 0, 2 * m],\n            ]\n        )\n        S = np.linalg.inv(C)\n    \n        def criterion(sig: cp.Variable, p: cp.Variable):\n            N = p.size\n            dev = np.array(\n                [\n                    [2 / 3.0, -1 / 3.0, -1 / 3.0, 0],\n                    [-1 / 3.0, 2 / 3.0, -1 / 3.0, 0],\n                    [-1 / 3.0, -1 / 3.0, 2 / 3.0, 0],\n                    [0, 0, 0, 1.0],\n                ]\n            )\n    \n            sig0_vec = np.repeat(sig0, N)\n            s = dev @ sig\n            return [np.sqrt(3 / 2) * cp.norm(s, axis=0) <= sig0_vec + p * H]\n    \n        particular_deps = np.array(\n            [7.24276667e-04, -3.41842340e-04, 0.00000000e00, -2.65071262e-05]\n        )\n        deps_dummy = np.full((4000, 4), particular_deps)\n    \n        N = 500\n        deps_local_values = deps_dummy[:N]\n    \n        deps = cp.Parameter((4, N), name=\"deps\")\n        sig_old = cp.Parameter((4, N), name=\"sig_old\")\n        sig_elas = sig_old + C @ deps\n        sig = cp.Variable((4, N), name=\"sig\")\n        p_old = cp.Parameter((N,), nonneg=True, name=\"p_old\")\n        p = cp.Variable((N,), nonneg=True, name=\"p\")\n    \n        sig_old.value = np.zeros((4, N))\n        deps.value = np.zeros((4, N))\n        p_old.value = np.zeros((N,))\n        deps.value = deps_local_values.T\n    \n        delta_sig = sig - sig_elas\n        D = H * np.eye(N)\n        S_sparsed = block_diag([S for _ in range(N)])\n        delta_sig_vector = cp.reshape(delta_sig, (N * 4))\n    \n        elastic_energy = cp.quad_form(delta_sig_vector, S_sparsed, assume_PSD=True)\n        target_expression = 0.5 * elastic_energy + 0.5 * cp.quad_form(p - p_old, D)\n        constraints = criterion(sig, p)\n    \n        problem = cp.Problem(cp.Minimize(target_expression), constraints)\n    \n        self.problem = problem",
+        "code": "class ConvexPlasticity:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        E_dim = 70e3  # [Pa]\n        E = 70e3 / E_dim  # [-] Young's modulus\n        nu = 0.3  # [-] Poisson's ratio\n        sig0 = 250 / E_dim  # [-] yield strength\n        Et = E / 100.0  # [-] tangent modulus\n        H = E * Et / (E - Et)  # [-] hardening modulus\n    \n        l, m = E * nu / (1 + nu) / (1 - 2 * nu), E / 2 / (1 + nu)  # noqa: E741\n    \n        # Elasticity stiffness matrix\n        C = np.array(\n            [\n                [l + 2 * m, l, l, 0],\n                [l, l + 2 * m, l, 0],\n                [l, l, l + 2 * m, 0],\n                [0, 0, 0, 2 * m],\n            ]\n        )\n        S = np.linalg.inv(C)\n    \n        def criterion(sig: cp.Variable, p: cp.Variable):\n            N = p.size\n            dev = np.array(\n                [\n                    [2 / 3.0, -1 / 3.0, -1 / 3.0, 0],\n                    [-1 / 3.0, 2 / 3.0, -1 / 3.0, 0],\n                    [-1 / 3.0, -1 / 3.0, 2 / 3.0, 0],\n                    [0, 0, 0, 1.0],\n                ]\n            )\n    \n            sig0_vec = np.repeat(sig0, N)\n            s = dev @ sig\n            return [np.sqrt(3 / 2) * cp.norm(s, axis=0) <= sig0_vec + p * H]\n    \n        particular_deps = np.array(\n            [7.24276667e-04, -3.41842340e-04, 0.00000000e00, -2.65071262e-05]\n        )\n        deps_dummy = np.full((4000, 4), particular_deps)\n    \n        N = 3000\n        deps_local_values = deps_dummy[:N]\n    \n        deps = cp.Parameter((4, N), name=\"deps\")\n        sig_old = cp.Parameter((4, N), name=\"sig_old\")\n        sig_elas = sig_old + C @ deps\n        sig = cp.Variable((4, N), name=\"sig\")\n        p_old = cp.Parameter((N,), nonneg=True, name=\"p_old\")\n        p = cp.Variable((N,), nonneg=True, name=\"p\")\n    \n        sig_old.value = np.zeros((4, N))\n        deps.value = np.zeros((4, N))\n        p_old.value = np.zeros((N,))\n        deps.value = deps_local_values.T\n    \n        delta_sig = sig - sig_elas\n        D = H * np.eye(N)\n        S_sparsed = block_diag([S for _ in range(N)])\n        delta_sig_vector = cp.reshape(delta_sig, (N * 4))\n    \n        elastic_energy = cp.quad_form(delta_sig_vector, S_sparsed, assume_PSD=True)\n        target_expression = 0.5 * elastic_energy + 0.5 * cp.quad_form(p - p_old, D)\n        constraints = criterion(sig, p)\n    \n        problem = cp.Problem(cp.Minimize(target_expression), constraints)\n    \n        self.problem = problem",
         "min_run_count": 2,
         "name": "high_dim_convex_plasticity.ConvexPlasticity.time_compile_problem",
         "number": 0,
@@ -92,7 +92,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "f324901397b434a5e2523f3afcf900cf3aaee0691640a60489228589016e2024",
+        "version": "e2fab93167f971eb586f0599c6de2465d8a56db177ad0ed5e7f1f3527ecb6bc2",
         "warmup_time": -1
     },
     "huber_regression.HuberRegression.time_compile_problem": {
@@ -112,7 +112,7 @@
         "warmup_time": -1
     },
     "matrix_stuffing.ConeMatrixStuffingBench.time_compile_problem": {
-        "code": "class ConeMatrixStuffingBench:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 2000\n        n = 2000\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
+        "code": "class ConeMatrixStuffingBench:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 5000\n        n = 5000\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "matrix_stuffing.ConeMatrixStuffingBench.time_compile_problem",
         "number": 0,
@@ -124,7 +124,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "d125bf0d94750542fdd88d64036c1b7330ce9bca4303bab8471c4a1e598d38c8",
+        "version": "fed1ccf59845d3ffb135690c0637852f02ba9215c5b4192cd223a716b51d2761",
         "warmup_time": -1
     },
     "matrix_stuffing.ParamConeMatrixStuffing.time_compile_problem": {
@@ -144,7 +144,7 @@
         "warmup_time": -1
     },
     "matrix_stuffing.ParamSmallMatrixStuffing.time_compile_problem": {
-        "code": "class ParamSmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 100\n        n = 100\n        A = cp.Parameter((m, n))\n        C = cp.Parameter(m // 2)\n        b = cp.Parameter(m)\n        A.value = np.random.randn(m, n)\n        C.value = np.random.rand(m // 2)\n        b.value = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
+        "code": "class ParamSmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 300\n        n = 300\n        A = cp.Parameter((m, n))\n        C = cp.Parameter(m // 2)\n        b = cp.Parameter(m)\n        A.value = np.random.randn(m, n)\n        C.value = np.random.rand(m // 2)\n        b.value = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "matrix_stuffing.ParamSmallMatrixStuffing.time_compile_problem",
         "number": 0,
@@ -156,11 +156,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "81b8fb141469c5aabb73461185550a9956d91a1ba85995911648101740f3d591",
+        "version": "fc8e14c60cdbd97238ed2f140337c8fd28c79f4e943d71be989ec15c81f6ac90",
         "warmup_time": -1
     },
     "matrix_stuffing.SmallMatrixStuffing.time_compile_problem": {
-        "code": "class SmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 200\n        n = 200\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
+        "code": "class SmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 4000\n        n = 4000\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "matrix_stuffing.SmallMatrixStuffing.time_compile_problem",
         "number": 0,
@@ -172,7 +172,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "ad3de554debe53fd9b8f4d8110f4b3534a4f1a6db334b2934d28c3a47c88b849",
+        "version": "8d3226335aec50ca837d7b5a94a12d57c65e398470cd6ea104acbabfba79f384",
         "warmup_time": -1
     },
     "optimal_advertising.OptimalAdvertising.time_compile_problem": {
@@ -224,7 +224,7 @@
         "warmup_time": -1
     },
     "semidefinite_programming.SemidefiniteProgramming.time_compile_problem": {
-        "code": "class SemidefiniteProgramming:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        # Generate a random SDP.\n        n = 125\n        p = 75\n        np.random.seed(1)\n        C = np.random.randn(n, n)\n        A = []\n        b = []\n        for i in range(p):\n            A.append(np.random.randn(n, n))\n            b.append(np.random.randn())\n    \n        # Define and solve the CVXPY problem.\n        # Create a symmetric matrix variable.\n        X = cp.Variable((n, n), symmetric=True)\n        constraints = [X >> 0]\n        constraints += [cp.trace(A[i] @ X) == b[i] for i in range(p)]\n        objective = cp.Minimize(cp.trace(C @ X))\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class SemidefiniteProgramming:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        # Generate a random SDP.\n        n = 200\n        p = 120\n        np.random.seed(1)\n        C = np.random.randn(n, n)\n        A = []\n        b = []\n        for i in range(p):\n            A.append(np.random.randn(n, n))\n            b.append(np.random.randn())\n    \n        # Define and solve the CVXPY problem.\n        # Create a symmetric matrix variable.\n        X = cp.Variable((n, n), symmetric=True)\n        constraints = [X >> 0]\n        constraints += [cp.trace(A[i] @ X) == b[i] for i in range(p)]\n        objective = cp.Minimize(cp.trace(C @ X))\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "semidefinite_programming.SemidefiniteProgramming.time_compile_problem",
         "number": 0,
@@ -236,11 +236,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "b8f19042c318507db3a79f3dfda663b94bfe6f0af2b43bf818e5c7f75fce4c59",
+        "version": "e2acb92f10d6e75bffb823c7ccb157fcfb74692885522cd536098cb1dae49fca",
         "warmup_time": -1
     },
     "simple_LP_benchmarks.SimpleFullyParametrizedLPBenchmark.time_compile_problem": {
-        "code": "class SimpleFullyParametrizedLPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        n = int(1e4)\n        p = cp.Parameter(n)\n        x = cp.Variable(n)\n        objective = cp.Minimize(p @ x)\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class SimpleFullyParametrizedLPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        n = int(1e6)\n        p = cp.Parameter(n)\n        x = cp.Variable(n)\n        objective = cp.Minimize(p @ x)\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_LP_benchmarks.SimpleFullyParametrizedLPBenchmark.time_compile_problem",
         "number": 0,
@@ -252,7 +252,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "107c2224d8c77ed7a8e5e3a7ae3545dc2357739b7a7f37f02d5d8372fa10db09",
+        "version": "c9ad126a948d1cb1d96bf271a731dda3b2b5ab9cfd3cc6648d84b8ed6f8e4140",
         "warmup_time": -1
     },
     "simple_LP_benchmarks.SimpleLPBenchmark.time_compile_problem": {
@@ -272,7 +272,7 @@
         "warmup_time": -1
     },
     "simple_LP_benchmarks.SimpleScalarParametrizedLPBenchmark.time_compile_problem": {
-        "code": "class SimpleScalarParametrizedLPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        n = int(1e6)\n        p = cp.Parameter()\n        c = np.arange(n)\n        x = cp.Variable(n)\n        objective = cp.Minimize((p * c) @ x)\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class SimpleScalarParametrizedLPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        n = int(2e6)\n        p = cp.Parameter()\n        c = np.arange(n)\n        x = cp.Variable(n)\n        objective = cp.Minimize((p * c) @ x)\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_LP_benchmarks.SimpleScalarParametrizedLPBenchmark.time_compile_problem",
         "number": 0,
@@ -284,11 +284,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "643deb6bc63211d7d322ac7ec9fe22c254ac6122afa51d53009157dbec777013",
+        "version": "9bc61595d80d3fbeea366b49ad3f6358d9ac143369959690963640f86d7a3f7f",
         "warmup_time": -1
     },
     "simple_QP_benchmarks.LeastSquares.time_compile_problem": {
-        "code": "class LeastSquares:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 5000\n        n = 1000\n        np.random.seed(1)\n        A = np.random.randn(m, n)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum_squares(A @ x - b)\n        problem = cp.Problem(cp.Minimize(cost))\n        self.problem = problem",
+        "code": "class LeastSquares:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 7000\n        n = 2000\n        np.random.seed(1)\n        A = np.random.randn(m, n)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum_squares(A @ x - b)\n        problem = cp.Problem(cp.Minimize(cost))\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_QP_benchmarks.LeastSquares.time_compile_problem",
         "number": 0,
@@ -300,11 +300,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "a780c97f86faca1c0b75992ac06434a9cd0e17cbfd9b466cbd20060838729607",
+        "version": "8cee407dcb3bf6b034bbbb811eba74bd834c9168d1487b8efccfaff28c22c12a",
         "warmup_time": -1
     },
     "simple_QP_benchmarks.ParametrizedQPBenchmark.time_compile_problem": {
-        "code": "class ParametrizedQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 250\n        n = 100\n        np.random.seed(1)\n        A = cp.Parameter((m, n))\n        b = cp.Parameter((m,))\n    \n        x = cp.Variable(n)\n        objective = cp.Minimize(cp.sum_squares(A @ x - b))\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
+        "code": "class ParametrizedQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 6000\n        n = 2400\n        np.random.seed(1)\n        A = cp.Parameter((m, n))\n        b = cp.Parameter((m,))\n    \n        x = cp.Variable(n)\n        objective = cp.Minimize(cp.sum_squares(A @ x - b))\n        constraints = [0 <= x, x <= 1]\n        problem = cp.Problem(objective, constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_QP_benchmarks.ParametrizedQPBenchmark.time_compile_problem",
         "number": 0,
@@ -316,11 +316,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "36472f339d84464f1e377c9506cb50ecd65a0e06ed4d9eca2ffce97b5cb11423",
+        "version": "088b27a2c5ce9f932978e01b3d22462892fc4c272298661aa5a8d67ac451f7fc",
         "warmup_time": -1
     },
     "simple_QP_benchmarks.SimpleQPBenchmark.time_compile_problem": {
-        "code": "class SimpleQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 2000\n        n = 400\n        p = 5\n        np.random.seed(1)\n        P = np.random.randn(n, n)\n        P = np.matmul(P.T, P)\n        q = np.random.randn(n)\n        G = np.random.randn(m, n)\n        h = np.matmul(G, np.random.randn(n))\n        A = np.random.randn(p, n)\n        b = np.random.randn(p)\n    \n        x = cp.Variable(n)\n        problem = cp.Problem(cp.Minimize((1 / 2) * cp.quad_form(x, P, assume_PSD=True) +\n                                         cp.matmul(q.T, x)),\n                             [cp.matmul(G, x) <= h,\n                              cp.matmul(A, x) == b])\n        self.problem = problem",
+        "code": "class SimpleQPBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.OSQP)\n\n    def setup(self):\n        m = 8000\n        n = 1600\n        p = 20\n        np.random.seed(1)\n        P = np.random.randn(n, n)\n        P = np.matmul(P.T, P)\n        q = np.random.randn(n)\n        G = np.random.randn(m, n)\n        h = np.matmul(G, np.random.randn(n))\n        A = np.random.randn(p, n)\n        b = np.random.randn(p)\n    \n        x = cp.Variable(n)\n        problem = cp.Problem(cp.Minimize((1 / 2) * cp.quad_form(x, P, assume_PSD=True) +\n                                         cp.matmul(q.T, x)),\n                             [cp.matmul(G, x) <= h,\n                              cp.matmul(A, x) == b])\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_QP_benchmarks.SimpleQPBenchmark.time_compile_problem",
         "number": 0,
@@ -332,11 +332,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "5bb63593b1e46938dfb8ae3467c4ffdf42583fe6a97e92734161e86d0df2ee6e",
+        "version": "71888193c2de9e8bf0aaf3105dcbfab744dc82b6e76afec8bca7df713cc500c6",
         "warmup_time": -1
     },
     "simple_QP_benchmarks.UnconstrainedQP.time_compile_problem": {
-        "code": "class UnconstrainedQP:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        N_r = 16\n        N_t = 2\n        N_s = 6\n    \n        x = np.random.randint(2, size=N_s * N_r * N_t)\n    \n        H = dft(N_s * N_r * N_t) * 1j\n        H_H = H.conj().T\n    \n        err = np.random.random(N_r)\n        Err = np.kron(np.diag(np.ones(N_s * N_t)), np.diag(err))\n    \n        y = H_H @ Err @ H @ x\n    \n        var = cp.Variable(shape=(N_r), complex=True)\n        Err_est = cp.kron(np.diag(np.ones(N_s * N_t)), cp.diag(var))\n    \n        res = cp.norm2(H_H @ Err_est @ H @ x - y)\n    \n        problem = cp.Problem(cp.Minimize(res))\n        self.problem = problem",
+        "code": "class UnconstrainedQP:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        N_r = 18\n        N_t = 2\n        N_s = 7\n    \n        x = np.random.randint(2, size=N_s * N_r * N_t)\n    \n        H = dft(N_s * N_r * N_t) * 1j\n        H_H = H.conj().T\n    \n        err = np.random.random(N_r)\n        Err = np.kron(np.diag(np.ones(N_s * N_t)), np.diag(err))\n    \n        y = H_H @ Err @ H @ x\n    \n        var = cp.Variable(shape=(N_r), complex=True)\n        Err_est = cp.kron(np.diag(np.ones(N_s * N_t)), cp.diag(var))\n    \n        res = cp.norm2(H_H @ Err_est @ H @ x - y)\n    \n        problem = cp.Problem(cp.Minimize(res))\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_QP_benchmarks.UnconstrainedQP.time_compile_problem",
         "number": 0,
@@ -348,11 +348,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "27046933d1d1fd5cf23189b6ce8bad5798f552613ac37bbbf517fba0d7083efb",
+        "version": "5d564a2ce7088f76d94c8f9f3fafbdc7cbb72967ea235c88c2ffb985993d954d",
         "warmup_time": -1
     },
     "slow_pruning_1668_benchmark.SlowPruningBenchmark.time_compile_problem": {
-        "code": "class SlowPruningBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        \"\"\"Regression test for https://github.com/cvxpy/cvxpy/issues/1668\n    \n        Pruning matrices caused order-of-magnitude slow downs in compilation times.\n        \"\"\"\n        s = 2000\n        t = 10\n        x = np.linspace(-100.0, 100.0, s)\n        rows = 50\n        var = cp.Variable(shape=(rows, t))\n    \n        cost = cp.sum_squares(\n            var @ np.tile(np.array([x]), t).reshape((t, x.shape[0]))\n            - np.tile(x, rows).reshape((rows, s))\n        )\n        objective = cp.Minimize(cost)\n        problem = cp.Problem(objective)\n        self.problem = problem",
+        "code": "class SlowPruningBenchmark:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        \"\"\"Regression test for https://github.com/cvxpy/cvxpy/issues/1668\n    \n        Pruning matrices caused order-of-magnitude slow downs in compilation times.\n        \"\"\"\n        s = 4000\n        t = 20\n        x = np.linspace(-100.0, 100.0, s)\n        rows = 100\n        var = cp.Variable(shape=(rows, t))\n    \n        cost = cp.sum_squares(\n            var @ np.tile(np.array([x]), t).reshape((t, x.shape[0]))\n            - np.tile(x, rows).reshape((rows, s))\n        )\n        objective = cp.Minimize(cost)\n        problem = cp.Problem(objective)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "slow_pruning_1668_benchmark.SlowPruningBenchmark.time_compile_problem",
         "number": 0,
@@ -364,7 +364,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "3844770ebf2a43f77aa8977342dd47622ffa2d45a39a6c5d93faf072035c21da",
+        "version": "5a9fcbf1c2086543ecf2ed27b3ac04202b243b76c0c158fad574a4691355e8db",
         "warmup_time": -1
     },
     "svm_l1_regularization.SVMWithL1Regularization.time_compile_problem": {
