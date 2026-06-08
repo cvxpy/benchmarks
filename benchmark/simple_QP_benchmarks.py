@@ -85,6 +85,7 @@ class UnconstrainedQP:
         N_t = 2
         N_s = 7
 
+        np.random.seed(0)
         x = np.random.randint(2, size=N_s * N_r * N_t)
 
         H = dft(N_s * N_r * N_t) * 1j

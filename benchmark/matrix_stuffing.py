@@ -21,6 +21,7 @@ class ConeMatrixStuffingBench:
     def setup(self):
         m = 5000
         n = 5000
+        np.random.seed(0)
         A = np.random.randn(m, n)
         C = np.random.rand(m // 2)
         b = np.random.randn(m)
@@ -44,6 +45,7 @@ class ParamConeMatrixStuffing:
     def setup(self):
         m = 200
         n = 200
+        np.random.seed(0)
         A = cp.Parameter((m, n))
         C = cp.Parameter(m // 2)
         b = cp.Parameter(m)
@@ -70,6 +72,7 @@ class SmallMatrixStuffing:
     def setup(self):
         m = 4000
         n = 4000
+        np.random.seed(0)
         A = np.random.randn(m, n)
         C = np.random.rand(m // 2)
         b = np.random.randn(m)
@@ -93,6 +96,7 @@ class ParamSmallMatrixStuffing:
     def setup(self):
         m = 300
         n = 300
+        np.random.seed(0)
         A = cp.Parameter((m, n))
         C = cp.Parameter(m // 2)
         b = cp.Parameter(m)
