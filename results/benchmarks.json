@@ -112,7 +112,7 @@
         "warmup_time": -1
     },
     "matrix_stuffing.ConeMatrixStuffingBench.time_compile_problem": {
-        "code": "class ConeMatrixStuffingBench:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 5000\n        n = 5000\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
+        "code": "class ConeMatrixStuffingBench:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 5000\n        n = 5000\n        np.random.seed(0)\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "matrix_stuffing.ConeMatrixStuffingBench.time_compile_problem",
         "number": 0,
@@ -124,11 +124,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "fed1ccf59845d3ffb135690c0637852f02ba9215c5b4192cd223a716b51d2761",
+        "version": "af0613a88e54f86e1144b634ddcedb91ab08f92aaa6a591ce4b2a6ecc937fa76",
         "warmup_time": -1
     },
     "matrix_stuffing.ParamConeMatrixStuffing.time_compile_problem": {
-        "code": "class ParamConeMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 200\n        n = 200\n        A = cp.Parameter((m, n))\n        C = cp.Parameter(m // 2)\n        b = cp.Parameter(m)\n        A.value = np.random.randn(m, n)\n        C.value = np.random.rand(m // 2)\n        b.value = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
+        "code": "class ParamConeMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 200\n        n = 200\n        np.random.seed(0)\n        A = cp.Parameter((m, n))\n        C = cp.Parameter(m // 2)\n        b = cp.Parameter(m)\n        A.value = np.random.randn(m, n)\n        C.value = np.random.rand(m // 2)\n        b.value = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "matrix_stuffing.ParamConeMatrixStuffing.time_compile_problem",
         "number": 0,
@@ -140,11 +140,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "56696934c045873dd9388d364c2cce6d29ae04d32455761d720571f0c7b0bd61",
+        "version": "7c2b04d030f811764078762bd85c0fdea59192a42250ac4f3ec1d79fd0374032",
         "warmup_time": -1
     },
     "matrix_stuffing.ParamSmallMatrixStuffing.time_compile_problem": {
-        "code": "class ParamSmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 300\n        n = 300\n        A = cp.Parameter((m, n))\n        C = cp.Parameter(m // 2)\n        b = cp.Parameter(m)\n        A.value = np.random.randn(m, n)\n        C.value = np.random.rand(m // 2)\n        b.value = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
+        "code": "class ParamSmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 300\n        n = 300\n        np.random.seed(0)\n        A = cp.Parameter((m, n))\n        C = cp.Parameter(m // 2)\n        b = cp.Parameter(m)\n        A.value = np.random.randn(m, n)\n        C.value = np.random.rand(m // 2)\n        b.value = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "matrix_stuffing.ParamSmallMatrixStuffing.time_compile_problem",
         "number": 0,
@@ -156,11 +156,11 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "fc8e14c60cdbd97238ed2f140337c8fd28c79f4e943d71be989ec15c81f6ac90",
+        "version": "613ee5f11c9186e614f6819fcfe8a7109fc1f20f01c44a5cef3502c72c8c8748",
         "warmup_time": -1
     },
     "matrix_stuffing.SmallMatrixStuffing.time_compile_problem": {
-        "code": "class SmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 4000\n        n = 4000\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
+        "code": "class SmallMatrixStuffing:\n    def time_compile_problem(self):\n        cms = ConeMatrixStuffing()\n        cms.apply(self.problem)\n\n    def setup(self):\n        m = 4000\n        n = 4000\n        np.random.seed(0)\n        A = np.random.randn(m, n)\n        C = np.random.rand(m // 2)\n        b = np.random.randn(m)\n    \n        x = cp.Variable(n)\n        cost = cp.sum(A @ x)\n    \n        constraints = [C[i] * x[i] <= b[i] for i in range(m // 2)]\n        constraints.extend([C[i] * x[m // 2 + i] == b[m // 2 + i] for i in range(m // 2)])\n    \n        problem = cp.Problem(cp.Minimize(cost), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "matrix_stuffing.SmallMatrixStuffing.time_compile_problem",
         "number": 0,
@@ -172,7 +172,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "8d3226335aec50ca837d7b5a94a12d57c65e398470cd6ea104acbabfba79f384",
+        "version": "882dd8d9777663b87b04ab1d0c240b0372583cd501aa6ddea53e948dfdf8306e",
         "warmup_time": -1
     },
     "optimal_advertising.OptimalAdvertising.time_compile_problem": {
@@ -336,7 +336,7 @@
         "warmup_time": -1
     },
     "simple_QP_benchmarks.UnconstrainedQP.time_compile_problem": {
-        "code": "class UnconstrainedQP:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        N_r = 18\n        N_t = 2\n        N_s = 7\n    \n        x = np.random.randint(2, size=N_s * N_r * N_t)\n    \n        H = dft(N_s * N_r * N_t) * 1j\n        H_H = H.conj().T\n    \n        err = np.random.random(N_r)\n        Err = np.kron(np.diag(np.ones(N_s * N_t)), np.diag(err))\n    \n        y = H_H @ Err @ H @ x\n    \n        var = cp.Variable(shape=(N_r), complex=True)\n        Err_est = cp.kron(np.diag(np.ones(N_s * N_t)), cp.diag(var))\n    \n        res = cp.norm2(H_H @ Err_est @ H @ x - y)\n    \n        problem = cp.Problem(cp.Minimize(res))\n        self.problem = problem",
+        "code": "class UnconstrainedQP:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        N_r = 18\n        N_t = 2\n        N_s = 7\n    \n        np.random.seed(0)\n        x = np.random.randint(2, size=N_s * N_r * N_t)\n    \n        H = dft(N_s * N_r * N_t) * 1j\n        H_H = H.conj().T\n    \n        err = np.random.random(N_r)\n        Err = np.kron(np.diag(np.ones(N_s * N_t)), np.diag(err))\n    \n        y = H_H @ Err @ H @ x\n    \n        var = cp.Variable(shape=(N_r), complex=True)\n        Err_est = cp.kron(np.diag(np.ones(N_s * N_t)), cp.diag(var))\n    \n        res = cp.norm2(H_H @ Err_est @ H @ x - y)\n    \n        problem = cp.Problem(cp.Minimize(res))\n        self.problem = problem",
         "min_run_count": 2,
         "name": "simple_QP_benchmarks.UnconstrainedQP.time_compile_problem",
         "number": 0,
@@ -348,7 +348,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "5d564a2ce7088f76d94c8f9f3fafbdc7cbb72967ea235c88c2ffb985993d954d",
+        "version": "68ad3dd4946510318ac042613d8c7690fda6680eddbf2038719e56dc0dab0a49",
         "warmup_time": -1
     },
     "slow_pruning_1668_benchmark.SlowPruningBenchmark.time_compile_problem": {
@@ -384,7 +384,7 @@
         "warmup_time": -1
     },
     "tv_inpainting.TvInpainting.time_compile_problem": {
-        "code": "class TvInpainting:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        Uorig = np.random.randn(512, 512, 3)\n        rows, cols, colors = Uorig.shape\n        known = np.zeros((rows, cols, colors))\n        for i in range(rows):\n            for j in range(cols):\n                if np.random.random() > 0.7:\n                    for k in range(colors):\n                        known[i, j, k] = 1\n    \n        Ucorr = known * Uorig  # This is elementwise mult on numpy arrays.\n        variables = []\n        constraints = []\n        for i in range(colors):\n                U = cp.Variable(shape=(rows, cols))\n                variables.append(U)\n                constraints.append(cp.multiply(\n                    known[:, :, i], U) == cp.multiply(\n                    known[:, :, i], Ucorr[:, :, i]))\n        problem = cp.Problem(cp.Minimize(cp.tv(*variables)), constraints)\n        self.problem = problem",
+        "code": "class TvInpainting:\n    def time_compile_problem(self):\n        self.problem.get_problem_data(solver=cp.SCS)\n\n    def setup(self):\n        np.random.seed(0)\n        Uorig = np.random.randn(512, 512, 3)\n        rows, cols, colors = Uorig.shape\n        known = np.zeros((rows, cols, colors))\n        for i in range(rows):\n            for j in range(cols):\n                if np.random.random() > 0.7:\n                    for k in range(colors):\n                        known[i, j, k] = 1\n    \n        Ucorr = known * Uorig  # This is elementwise mult on numpy arrays.\n        variables = []\n        constraints = []\n        for i in range(colors):\n                U = cp.Variable(shape=(rows, cols))\n                variables.append(U)\n                constraints.append(cp.multiply(\n                    known[:, :, i], U) == cp.multiply(\n                    known[:, :, i], Ucorr[:, :, i]))\n        problem = cp.Problem(cp.Minimize(cp.tv(*variables)), constraints)\n        self.problem = problem",
         "min_run_count": 2,
         "name": "tv_inpainting.TvInpainting.time_compile_problem",
         "number": 0,
@@ -396,7 +396,7 @@
         "timeout": 60.0,
         "type": "time",
         "unit": "seconds",
-        "version": "9e77ab42b03f5c2ebc54cdf3184e3fa6b04773212bbfdc734635987fd52f5678",
+        "version": "96785dad5ff304a71d89aea04dfe5304d8d581887b7d8a4e4a59145280e0155b",
         "warmup_time": -1
     },
     "version": 2
