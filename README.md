@@ -17,6 +17,30 @@ To run a particular benchmark use:
 ```
 asv run --bench CVaRBenchmark
 ```
+## Canonicalization backend benchmarks
+`benchmark/canonicalization_backends.py` compares CVXPY's canonicalization
+backends on affine atom families, deep/wide expression trees, ND arrays,
+broadcasting, einsum, convolve, kron, and dense-constant density regimes:
+```
+asv run --bench BackendCompileCanonicalization    # end-to-end get_problem_data
+asv run --bench BackendBuildMatrixCanonicalization  # backend build_matrix only
+asv run --bench DeepExpressionTreeScaling         # -(-(...-(x))), depth 4..256
+asv run --bench WideExpressionTreeScaling         # sum of n matmul terms, n 8..256
+```
+All four are parameterized over `SCIPY`, `COO`, `CPP`, and `RUST`. Unavailable
+backends (e.g. `RUST` when the `cvxpy_rust` extension is not installed, or
+`CPP` on expressions the C++ core does not support) are reported as
+unsupported for that parameter combination rather than failing. The module's
+`LINOP_COVERAGE` dict maps every LinOp node type the backends process to the
+cases exercising it.
+
+To benchmark a locally built CVXPY (required for `RUST`, whose extension is
+built by maturin/setuptools-rust rather than pip-installed from PyPI), run in
+the current environment instead of an asv-managed one:
+```
+asv run --python=same --bench BackendCompileCanonicalization
+```
+
 You can also collect and view the results on a viewable website:
 ```
 asv run
