@@ -19,7 +19,7 @@ setuptools.setup(
     license='Apache License, Version 2.0',
     install_requires=[
         "cvxpy",
-        "asv<0.6",
+        "asv<0.7",
         "virtualenv",
         "clarabel",
         "scs",

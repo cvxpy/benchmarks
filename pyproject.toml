@@ -5,6 +5,7 @@ exclude = [
     "doc",
     "*__init__.py"
 ]
+# The minimum Python version that should be supported
 target-version = "py311"
 
 [tool.ruff.lint]
