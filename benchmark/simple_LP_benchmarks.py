@@ -31,7 +31,7 @@ class SimpleLPBenchmark:
 
 class SimpleFullyParametrizedLPBenchmark:
     def setup(self):
-        n = int(1e4)
+        n = int(1e6)
         p = cp.Parameter(n)
         x = cp.Variable(n)
         objective = cp.Minimize(p @ x)
@@ -45,7 +45,7 @@ class SimpleFullyParametrizedLPBenchmark:
 
 class SimpleScalarParametrizedLPBenchmark:
     def setup(self):
-        n = int(1e6)
+        n = int(2e6)
         p = cp.Parameter()
         c = np.arange(n)
         x = cp.Variable(n)

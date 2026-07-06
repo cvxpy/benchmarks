@@ -62,7 +62,7 @@ class ConvexPlasticity:
         )
         deps_dummy = np.full((4000, 4), particular_deps)
 
-        N = 500
+        N = 3000
         deps_local_values = deps_dummy[:N]
 
         deps = cp.Parameter((4, N), name="deps")

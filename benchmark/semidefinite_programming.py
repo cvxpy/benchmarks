@@ -22,8 +22,8 @@ class SemidefiniteProgramming:
 
     def setup(self):
         # Generate a random SDP.
-        n = 125
-        p = 75
+        n = 200
+        p = 120
         np.random.seed(1)
         C = np.random.randn(n, n)
         A = []

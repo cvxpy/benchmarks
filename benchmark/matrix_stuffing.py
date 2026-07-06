@@ -19,8 +19,9 @@ from cvxpy.reductions.dcp2cone.cone_matrix_stuffing import ConeMatrixStuffing
 class ConeMatrixStuffingBench:
 
     def setup(self):
-        m = 2000
-        n = 2000
+        m = 5000
+        n = 5000
+        np.random.seed(0)
         A = np.random.randn(m, n)
         C = np.random.rand(m // 2)
         b = np.random.randn(m)
@@ -44,6 +45,7 @@ class ParamConeMatrixStuffing:
     def setup(self):
         m = 200
         n = 200
+        np.random.seed(0)
         A = cp.Parameter((m, n))
         C = cp.Parameter(m // 2)
         b = cp.Parameter(m)
@@ -68,8 +70,9 @@ class ParamConeMatrixStuffing:
 class SmallMatrixStuffing:
 
     def setup(self):
-        m = 200
-        n = 200
+        m = 4000
+        n = 4000
+        np.random.seed(0)
         A = np.random.randn(m, n)
         C = np.random.rand(m // 2)
         b = np.random.randn(m)
@@ -91,8 +94,9 @@ class SmallMatrixStuffing:
 class ParamSmallMatrixStuffing:
 
     def setup(self):
-        m = 100
-        n = 100
+        m = 300
+        n = 300
+        np.random.seed(0)
         A = cp.Parameter((m, n))
         C = cp.Parameter(m // 2)
         b = cp.Parameter(m)
