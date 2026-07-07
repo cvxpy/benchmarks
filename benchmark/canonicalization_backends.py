@@ -9,16 +9,21 @@ Structure
 ---------
 - ``BackendCompileCanonicalization`` times ``Problem.get_problem_data`` end to
   end for every (case, backend) pair.
-- ``BackendBuildMatrixCanonicalization`` captures the LinOp trees once, then
-  times only the backend's ``build_matrix`` call, isolating backend cost from
-  the rest of the compilation chain.
+- ``BackendBuildMatrixCanonicalization`` captures the LinOp DAG once (cvxpy
+  shares subexpression nodes; cvxpy/cvxpy#3423 exploits this), then times only
+  the backend's ``build_matrix`` call, isolating backend cost from the rest of
+  the compilation chain.
 - ``DeepExpressionTreeScaling`` / ``WideExpressionTreeScaling`` time
   ``get_problem_data`` as expression-tree depth (``-(-(...-(x)))``) and sum
   width (``A_1 @ x + ... + A_n @ x``) grow.
+- ``WideConstraintScaling`` grows the number of independent constraints —
+  each constraint is its own LinOp root, the axis along which backends can
+  parallelize.
 
-Backends that are unavailable in the installed CVXPY (e.g. RUST without the
-``cvxpy_rust`` extension, COO before CVXPY 1.7) raise ``NotImplementedError``
-in ``setup`` so asv reports them as n/a instead of failing.
+Backends that are unavailable in the installed CVXPY (RUST without the
+``cvxpy_rust`` extension, CPP without the compiled cvxcore extension) raise
+``NotImplementedError`` in ``setup`` so asv reports them as n/a instead of
+failing.
 
 Expensive problem construction happens once in ``setup``; the timed functions
 wrap the prebuilt expressions in a fresh ``Problem`` so the solving-chain cache
@@ -50,49 +55,20 @@ class BenchmarkCase:
     supports_cpp: bool = True
 
 
-def _reshape(expr, shape):
-    try:
-        return cp.reshape(expr, shape, order="F")
-    except TypeError:
-        return cp.reshape(expr, shape)
-
-
-def _vec(expr):
-    try:
-        return cp.vec(expr, order="F")
-    except TypeError:
-        return cp.vec(expr)
-
-
-def _flatten(expr):
-    size = int(np.prod(expr.shape)) if expr.shape else 1
-    return _reshape(expr, (size,))
-
-
-def _scalar_to_vector(expr):
-    return _reshape(expr, (1,))
-
-
 def _available_backend(backend: str) -> bool:
-    if backend == "SCIPY":
-        return True
-    if backend == "COO":
-        return getattr(cp, "COO_CANON_BACKEND", None) == "COO"
+    # SCIPY and COO ship with cvxpy; CPP needs the compiled cvxcore extension
+    # and RUST the cvxpy_rust extension, neither of which is guaranteed.
     if backend == "CPP":
         try:
             from cvxpy.cvxcore.python.cppbackend import build_matrix  # noqa: F401
         except ImportError:
             return False
-        return True
     if backend == "RUST":
-        if getattr(cp, "RUST_CANON_BACKEND", None) != "RUST":
-            return False
         try:
             import cvxpy_rust  # noqa: F401
         except ImportError:
             return False
-        return True
-    return False
+    return True
 
 
 def _require_backend(backend: str, supports_cpp: bool = True, case_name: str = "") -> None:
@@ -102,46 +78,11 @@ def _require_backend(backend: str, supports_cpp: bool = True, case_name: str = "
         raise NotImplementedError(f"{case_name or 'case'} uses expressions unsupported by CPP")
 
 
-def _require_cpp_contract(problem: cp.Problem, backend: str, case_name: str) -> None:
-    # CVXPY refuses an explicit CPP backend for problems whose expressions the
-    # C++ core does not support; report those cells as n/a rather than errors.
-    if backend != "CPP":
-        return
-    checker = getattr(problem, "_supports_cpp", None)
-    if checker is not None and not checker():
+def _skip_if_cpp_unsupported(problem: cp.Problem, backend: str, case_name: str) -> None:
+    # get_problem_data refuses an explicit CPP backend for expressions the C++
+    # core does not support; report those cells as n/a rather than errors.
+    if backend == "CPP" and not problem._supports_cpp():
         raise NotImplementedError(f"{case_name} uses expressions unsupported by CPP")
-
-
-def _get_backend_instance(
-    backend: str,
-    id_to_col: dict[int, int],
-    param_to_size: dict[int, int],
-    param_to_col: dict[int, int],
-    param_size_plus_one: int,
-    var_length: int,
-):
-    try:
-        from cvxpy.lin_ops.backends import get_backend
-
-        return get_backend(
-            backend,
-            id_to_col,
-            param_to_size,
-            param_to_col,
-            param_size_plus_one,
-            var_length,
-        )
-    except ImportError:
-        from cvxpy.lin_ops.canon_backend import CanonBackend
-
-        return CanonBackend.get_backend(
-            backend,
-            id_to_col,
-            param_to_size,
-            param_to_col,
-            param_size_plus_one,
-            var_length,
-        )
 
 
 def _build_matrix(captured_call: dict, backend: str):
@@ -158,7 +99,9 @@ def _build_matrix(captured_call: dict, backend: str):
             c["lin_ops"],
         )
 
-    backend_obj = _get_backend_instance(
+    from cvxpy.lin_ops.backends import get_backend
+
+    backend_obj = get_backend(
         backend,
         dict(c["id_to_col"]),
         dict(c["param_to_size"]),
@@ -213,13 +156,17 @@ def _capture_build_matrix_call(problem: cp.Problem, solver: str) -> dict:
 
     if not captured:
         raise NotImplementedError("problem did not invoke get_problem_matrix")
-    return max(captured, key=lambda call: len(call["lin_ops"]))
+    # Compilation invokes get_problem_matrix twice: once for the (scalar)
+    # objective and once for the constraints. Benchmark the constraints call —
+    # selecting by len(lin_ops) alone ties on single-constraint problems and
+    # would pick the trivial objective call.
+    return max(captured, key=lambda call: (call["constr_length"], len(call["lin_ops"])))
 
 
 def _make_core_affine_atoms() -> tuple[cp.Problem, str]:
     rng = np.random.default_rng(1)
     x = cp.Variable((8, 6))
-    expr = _reshape(cp.transpose(x), (48,))
+    expr = cp.reshape(cp.transpose(x), (48,), order="F")
     odd_even_diff = expr[::2] - expr[1::2]
     scaled = odd_even_diff / 2.5
     objective = cp.Minimize(cp.sum_squares(scaled + rng.standard_normal(24)))
@@ -251,23 +198,23 @@ def _make_rmul_promote() -> tuple[cp.Problem, str]:
 def _make_hstack_vstack() -> tuple[cp.Problem, str]:
     rng = np.random.default_rng(3)
     x = cp.Variable(16)
-    a = _reshape(rng.standard_normal((16, 16)) @ x, (4, 4))
-    b = _reshape(rng.standard_normal((16, 16)) @ x, (4, 4))
+    a = cp.reshape(rng.standard_normal((16, 16)) @ x, (4, 4), order="F")
+    b = cp.reshape(rng.standard_normal((16, 16)) @ x, (4, 4), order="F")
     v = cp.vstack([a, b])
     h = cp.hstack([a, cp.transpose(b)])
     expr = cp.vstack([v, cp.transpose(h)])
-    return cp.Problem(cp.Minimize(cp.sum_squares(_vec(expr)))), cp.CLARABEL
+    return cp.Problem(cp.Minimize(cp.sum_squares(expr.flatten(order="F")))), cp.CLARABEL
 
 
 def _make_concatenate() -> tuple[cp.Problem, str]:
     # cp.concatenate is not supported by the CPP backend
     rng = np.random.default_rng(14)
     x = cp.Variable(16)
-    a = _reshape(rng.standard_normal((16, 16)) @ x, (4, 4))
-    b = _reshape(rng.standard_normal((16, 16)) @ x, (4, 4))
+    a = cp.reshape(rng.standard_normal((16, 16)) @ x, (4, 4), order="F")
+    b = cp.reshape(rng.standard_normal((16, 16)) @ x, (4, 4), order="F")
     expr = cp.concatenate([a, cp.transpose(b)], axis=1)
     expr = cp.concatenate([expr, cp.hstack([a, b])], axis=0)
-    return cp.Problem(cp.Minimize(cp.sum_squares(_vec(expr)))), cp.CLARABEL
+    return cp.Problem(cp.Minimize(cp.sum_squares(expr.flatten(order="F")))), cp.CLARABEL
 
 
 def _make_diag_trace_kron() -> tuple[cp.Problem, str]:
@@ -276,11 +223,11 @@ def _make_diag_trace_kron() -> tuple[cp.Problem, str]:
     kron_right = cp.kron(np.eye(3), diag_matrix) @ np.ones(24)  # kron_r: constant left
     kron_left = cp.kron(diag_matrix, np.eye(2)) @ np.ones(16)  # kron_l: expression left
     pieces = [
-        _flatten(kron_right),
-        _flatten(kron_left),
-        _flatten(cp.upper_tri(diag_matrix)),
-        _flatten(cp.diag(diag_matrix)),
-        _scalar_to_vector(cp.trace(diag_matrix)),
+        kron_right.flatten(order="F"),
+        kron_left.flatten(order="F"),
+        cp.upper_tri(diag_matrix).flatten(order="F"),
+        cp.diag(diag_matrix).flatten(order="F"),
+        cp.reshape(cp.trace(diag_matrix), (1,), order="F"),
     ]
     expr = cp.hstack(pieces)
     return cp.Problem(cp.Minimize(cp.sum_squares(expr))), cp.CLARABEL
@@ -291,8 +238,7 @@ def _make_convolve() -> tuple[cp.Problem, str]:
     x = cp.Variable(80)
     kernel = rng.standard_normal(17)
     target = rng.standard_normal(96)
-    conv = cp.convolve if hasattr(cp, "convolve") else cp.conv
-    expr = conv(kernel, x) - target
+    expr = cp.convolve(kernel, x) - target
     return cp.Problem(cp.Minimize(cp.sum_squares(expr))), cp.CLARABEL
 
 
@@ -326,22 +272,17 @@ def _make_nd_matmul() -> tuple[cp.Problem, str]:
     rng = np.random.default_rng(6)
     x = cp.Variable((2, 3, 4))
     left = rng.standard_normal((2, 5, 3))
-    try:
-        expr = left @ x
-    except Exception as exc:  # noqa: BLE001
-        raise NotImplementedError("CVXPY checkout does not support ND matmul") from exc
-    return cp.Problem(cp.Minimize(cp.sum_squares(_vec(expr)))), cp.CLARABEL
+    expr = left @ x
+    return cp.Problem(cp.Minimize(cp.sum_squares(expr.flatten(order="F")))), cp.CLARABEL
 
 
 def _make_einsum() -> tuple[cp.Problem, str]:
-    if not hasattr(cp, "einsum"):
-        raise NotImplementedError("CVXPY checkout does not expose cp.einsum")
     rng = np.random.default_rng(7)
     x = cp.Variable((4, 5))
     left = rng.standard_normal((3, 4))
     right = rng.standard_normal((5, 2))
     expr = cp.einsum("ij,jk,kl->il", left, x, right)
-    return cp.Problem(cp.Minimize(cp.sum_squares(_vec(expr)))), cp.CLARABEL
+    return cp.Problem(cp.Minimize(cp.sum_squares(expr.flatten(order="F")))), cp.CLARABEL
 
 
 def _make_deep_neg_tree() -> tuple[cp.Problem, str]:
@@ -374,6 +315,17 @@ def _make_parameterized_lp() -> tuple[cp.Problem, str]:
     return problem, cp.CLARABEL
 
 
+def _sparse_density_threshold() -> float:
+    # SPARSE_DENSITY_THRESHOLD first shipped after the 1.9.2 release; fall
+    # back to its master default on releases that predate it.
+    return getattr(cp.settings, "SPARSE_DENSITY_THRESHOLD", 0.05)
+
+
+# Scaled-down restatement of the Gini portfolio problem in
+# benchmark/gini_portfolio.py (its Murray case). Restated rather than imported
+# so the pairs-matrix density is a parameter: the two cases below pin one
+# density on each side of SPARSE_DENSITY_THRESHOLD, keeping sparsification
+# heuristics observable separately from the genuinely-dense path.
 def _gini_portfolio_problem(dense_pairs: np.ndarray, returns: np.ndarray) -> cp.Problem:
     n_times, n_assets = returns.shape
     pair_count = dense_pairs.shape[0]
@@ -393,12 +345,18 @@ def _gini_portfolio_problem(dense_pairs: np.ndarray, returns: np.ndarray) -> cp.
 
 
 def _make_murray_dense_constant() -> tuple[cp.Problem, str]:
-    # Scaled-down gini_portfolio.Murray: a dense ndarray constant that is
-    # ~98.9% zeros (density 2/180 ~ 0.011, below cvxpy's
-    # SPARSE_DENSITY_THRESHOLD of 0.05) multiplies an affine expression.
+    # A dense ndarray constant with 2 nonzeros per row (density 2/180 ~ 0.011,
+    # below the sparsity threshold) multiplies an affine expression. Guarded so
+    # the case reports n/a instead of silently measuring the wrong regime if
+    # the threshold ever drops beneath the natural pairs density.
     rng = np.random.default_rng(10)
     n_assets = 20
     n_times = 180
+    if 2.0 / n_times >= _sparse_density_threshold():
+        raise NotImplementedError(
+            "the pairs-matrix density is not below SPARSE_DENSITY_THRESHOLD; "
+            "the below-threshold regime does not apply"
+        )
     pair_count = n_times * (n_times - 1) // 2
     returns = rng.standard_normal((n_times, n_assets)) / 1000
 
@@ -412,19 +370,32 @@ def _make_murray_dense_constant() -> tuple[cp.Problem, str]:
 
 
 def _make_murray_dense_above_threshold() -> tuple[cp.Problem, str]:
-    # Same problem shape, but the constant has ~15% nonzeros — above
-    # SPARSE_DENSITY_THRESHOLD — so sparsification heuristics must not fire.
+    # Same problem shape, but the constant's density sits well above the
+    # sparsity threshold (tracking the runtime value, so the case stays
+    # meaningful if the threshold changes) — sparsification must not fire.
     rng = np.random.default_rng(10)
     n_assets = 20
     n_times = 180
     pair_count = n_times * (n_times - 1) // 2
     returns = rng.standard_normal((n_times, n_assets)) / 1000
 
-    mask = rng.random((pair_count, n_times)) < 0.15
+    density = min(3.0 * _sparse_density_threshold(), 0.5)
+    mask = rng.random((pair_count, n_times)) < density
     signs = np.where(rng.random((pair_count, n_times)) < 0.5, -1.0, 1.0)
     dense_pairs = np.where(mask, signs, 0.0)
 
     return _gini_portfolio_problem(dense_pairs, returns), cp.CLARABEL
+
+
+def _make_shared_subexpressions() -> tuple[cp.Problem, str]:
+    # One affine subexpression reused across many terms: the canonicalized
+    # LinOp structure is a DAG with shared nodes — the workload targeted by
+    # the memoization in cvxpy/cvxpy#3423.
+    rng = np.random.default_rng(15)
+    x = cp.Variable(64)
+    common = rng.standard_normal((64, 64)) @ x
+    terms = [cp.sum_squares(common[i:i + 24]) for i in range(0, 40, 2)]
+    return cp.Problem(cp.Minimize(sum(terms))), cp.CLARABEL
 
 
 def _make_kron_diag_dense_affine() -> tuple[cp.Problem, str]:
@@ -433,7 +404,7 @@ def _make_kron_diag_dense_affine() -> tuple[cp.Problem, str]:
     reps = 4
     g = cp.Variable((n, n), symmetric=True)
     v = rng.standard_normal((6, n))
-    diag_expr = _reshape(cp.diag(v @ g @ v.T), (6, 1))
+    diag_expr = cp.reshape(cp.diag(v @ g @ v.T), (6, 1), order="F")
     expr = cp.kron(np.ones((reps, 1)), diag_expr)
     return cp.Problem(cp.Minimize(cp.sum_squares(expr)), [g >> 0]), cp.CLARABEL
 
@@ -452,11 +423,11 @@ LINOP_COVERAGE = {
     "sum": ["matmul_multiply_divide", "wide_sum_tree", "WideExpressionTreeScaling"],
     "neg": ["core_affine_atoms", "deep_neg_tree", "DeepExpressionTreeScaling"],
     "promote": ["rmul_promote"],
-    "mul": ["matmul_multiply_divide", "murray_dense_constant"],
+    "mul": ["matmul_multiply_divide", "murray_dense_constant", "shared_subexpressions"],
     "rmul": ["rmul_promote", "kron_diag_dense_affine"],
     "mul_elem": ["matmul_multiply_divide", "einsum"],
     "div": ["core_affine_atoms", "matmul_multiply_divide"],
-    "index": ["core_affine_atoms", "nd_array_ops"],
+    "index": ["core_affine_atoms", "nd_array_ops", "shared_subexpressions"],
     "transpose": ["core_affine_atoms", "hstack_vstack", "nd_array_ops"],
     "reshape": ["core_affine_atoms", "hstack_vstack", "diag_trace_kron"],
     "broadcast_to": ["nd_array_ops"],
@@ -490,6 +461,7 @@ CASES = [
     BenchmarkCase("deep_neg_tree", _make_deep_neg_tree),
     BenchmarkCase("wide_sum_tree", _make_wide_sum_tree),
     BenchmarkCase("parameterized_lp", _make_parameterized_lp),
+    BenchmarkCase("shared_subexpressions", _make_shared_subexpressions),
     BenchmarkCase("murray_dense_constant", _make_murray_dense_constant),
     BenchmarkCase("murray_dense_above_threshold", _make_murray_dense_above_threshold),
     BenchmarkCase("kron_diag_dense_affine", _make_kron_diag_dense_affine),
@@ -509,7 +481,7 @@ class BackendCompileCanonicalization:
         case = CASE_BY_NAME[case_name]
         _require_backend(backend, case.supports_cpp, case.name)
         self.problem, self.solver = case.factory()
-        _require_cpp_contract(self.problem, backend, case.name)
+        _skip_if_cpp_unsupported(self.problem, backend, case.name)
 
     def time_get_problem_data(self, case_name: str, backend: str) -> None:
         # fresh Problem: defeats the solving-chain cache without timing
@@ -529,7 +501,7 @@ class BackendBuildMatrixCanonicalization:
         case = CASE_BY_NAME[case_name]
         _require_backend(backend, case.supports_cpp, case.name)
         problem, solver = case.factory()
-        _require_cpp_contract(problem, backend, case.name)
+        _skip_if_cpp_unsupported(problem, backend, case.name)
         self.captured_call = _capture_build_matrix_call(problem, solver)
 
     def time_build_matrix(self, case_name: str, backend: str) -> None:
@@ -561,7 +533,11 @@ class DeepExpressionTreeScaling:
 
 
 class WideExpressionTreeScaling:
-    """Compile time as sum width grows: A_1 @ x + ... + A_width @ x."""
+    """Compile time as sum width grows: A_1 @ x + ... + A_width @ x.
+
+    Repeated ``+`` flattens into a single AddExpression, so the LinOp sum node
+    has ``width`` children — one wide node, not a chain of binary adds.
+    """
 
     timeout = 300
     param_names = ["width", "backend"]
@@ -577,4 +553,30 @@ class WideExpressionTreeScaling:
 
     def time_get_problem_data(self, width: int, backend: str) -> None:
         fresh = cp.Problem(self.objective)
+        fresh.get_problem_data(solver=cp.CLARABEL, canon_backend=backend)
+
+
+class WideConstraintScaling:
+    """Compile time as the number of independent constraints grows.
+
+    Each constraint is its own LinOp root — the axis along which backends can
+    parallelize canonicalization across constraints.
+    """
+
+    timeout = 300
+    param_names = ["n_constraints", "backend"]
+    params = [[8, 64, 256], BACKENDS]
+
+    def setup(self, n_constraints: int, backend: str) -> None:
+        _require_backend(backend)
+        rng = np.random.default_rng(22)
+        x = cp.Variable(32)
+        self.objective = cp.Minimize(cp.sum(x))
+        self.constraints = [
+            rng.standard_normal((12, 32)) @ x <= rng.standard_normal(12) + 10.0
+            for _ in range(n_constraints)
+        ]
+
+    def time_get_problem_data(self, n_constraints: int, backend: str) -> None:
+        fresh = cp.Problem(self.objective, self.constraints)
         fresh.get_problem_data(solver=cp.CLARABEL, canon_backend=backend)
