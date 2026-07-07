@@ -40,6 +40,9 @@
         "scs": [],
         "numpy": [],
         "scipy": [],
+        "highspy": [],
+        "qdldl": [],
+        "sparsediffpy": [],
         "pybind11": []
     },
 

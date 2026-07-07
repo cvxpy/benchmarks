@@ -36,10 +36,13 @@
     //
     "matrix": {
         "osqp": [],
-        "ecos": [],
+        "clarabel": [],
         "scs": [],
         "numpy": [],
         "scipy": [],
+        "highspy": [],
+        "qdldl": [],
+        "sparsediffpy": [],
         "pybind11": []
     },
 
