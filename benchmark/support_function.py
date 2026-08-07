@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 import cvxpy as cp
-import numpy as np
 
 
 class SupportFunctionPSD:
@@ -30,11 +29,7 @@ class SupportFunctionPSD:
         sigma = cp.suppfunc(X, [X >> 0, cp.trace(X) <= 1])
 
         Y = cp.Variable((n, n))
-        epigraph = cp.Variable()
-        self.problem = cp.Problem(
-            cp.Minimize(epigraph),
-            [sigma(Y) <= epigraph, Y == np.eye(n)],
-        )
+        self.problem = cp.Problem(cp.Minimize(sigma(Y)))
 
     def time_compile_problem(self):
         self.problem.get_problem_data(solver=cp.SCS)
