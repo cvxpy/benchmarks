@@ -1,0 +1,9 @@
+{
+    "arch": "x86_64",
+    "cpu": "INTEL(R) XEON(R) PLATINUM 8573C",
+    "machine": "runnervmnwato",
+    "num_cpu": "4",
+    "os": "Linux 7.0.0-1017-azure",
+    "ram": "16758407168",
+    "version": 1
+}
